@@ -1,9 +1,7 @@
 #pragma once
 #include "icg_common.h"
-#define XVAL 16
-#define YVAL 16
 
-class Quad{
+class Mesh{
 private:
     GLuint _vao; ///< vertex array object
     GLuint _pid; ///< GLSL shader program ID 
@@ -13,33 +11,31 @@ private:
     std::vector<int> _triangulation_index;
 public:
 
-    void init(){
+    void init(int xCoord, int yCoord){
         ///--- Compile the shaders
-        _pid = opengp::load_shaders("Quad/vshader.glsl", "Quad/fshader.glsl");
+        _pid = opengp::load_shaders("Mesh/vshader.glsl", "Mesh/fshader.glsl");
         if(!_pid) exit(EXIT_FAILURE);       
         glUseProgram(_pid);
         
-
-
         ///--- Vertex coordinates
         {
-            for(int i = 0; i < XVAL; ++i)
+            for(int i = 0; i < xCoord; ++i)
             {
-                for(int j = 0; j < YVAL; ++j)
+                for(int j = 0; j < yCoord; ++j)
                 {
-                    float xScale = float(i)/float(XVAL-1);
-                    float yScale = float(j)/float(YVAL-1);
-                    _triangulation.push_back(vec3(-1.0 + xScale, -1.0 + yScale, 0.0));
+                    float xScale = float(i)/float(xCoord-1);
+                    float yScale = float(j)/float(yCoord-1);
+                    _triangulation.push_back(vec3(-1.0 + (xScale * 2), -1.0 + (yScale * 2), 0.0));
                 }
             }
 
-            for(int i = 0; i < _triangulation.size()-XVAL; ++i)
+            for(int i = 0; i < _triangulation.size()-xCoord; ++i)
             {
-                if(i%XVAL == 0 && i != 0){
-                    _triangulation_index.push_back(XVAL*YVAL);
+                if(i%xCoord == 0 && i != 0){
+                    _triangulation_index.push_back(xCoord*yCoord);
                 }
                 _triangulation_index.push_back(i);
-                _triangulation_index.push_back(i+XVAL);
+                _triangulation_index.push_back(i+xCoord);
 
             }
 
@@ -62,7 +58,7 @@ public:
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int)*_triangulation_index.size(), &_triangulation_index[0], GL_STATIC_DRAW);
             glEnable(GL_PRIMITIVE_RESTART);
-            glPrimitiveRestartIndex(XVAL*YVAL);
+            glPrimitiveRestartIndex(xCoord*yCoord);
 
         }
 
