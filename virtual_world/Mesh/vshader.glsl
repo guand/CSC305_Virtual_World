@@ -1,11 +1,21 @@
-#version 330 core
-in vec3 vpoint;
-const vec3 COLORS[1] = vec3[](
-    vec3(0.0,0.0,0.0));
-out vec3 fcolor;
+#version 330 core 
+uniform float time;
+in vec3 vpoint; ///< [-1,+1]
+out float vheight; ///< for debug coloring
+out float scale=.5;
+
+uniform mat4 MODEL;
+uniform mat4 VIEW;
+uniform mat4 PROJ;
+
+uniform sampler2D tex;
+float tex_at(vec2 uv){ return texture(tex,uv).r; }
 
 void main() {
-    // gl_Position = S(.5) * R(10) * vec4(vpoint, 1.0);
-    gl_Position = vec4(vpoint, 1.0);
-    fcolor = COLORS[gl_VertexID];
+    /// UNCOMMENT ONE OF THESE
+//    vheight = 0;
+//    vheight = scale * sin(10*vpoint.x + time);
+    vheight = scale * tex_at( .5*vec2(time+vpoint.x, vpoint.y)+.5 );
+
+    gl_Position = PROJ * VIEW * MODEL * vec4(vpoint.x, vpoint.y, vheight, 1.0);
 }
