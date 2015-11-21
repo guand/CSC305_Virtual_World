@@ -1,17 +1,20 @@
 #include "icg_common.h"
 #include "Mesh/Mesh.h"
+#include "Mesh/Perlin.h"
 
 int window_width = 1024;
 int window_height = 640;
 
 Mesh mesh;
+Perlin perlin;
 float theta = 30; //< camera angle
 
 void init(){
     glfwEnable(GLFW_KEY_REPEAT);     
     glClearColor(1,1,1, /*solid*/1.0 );    
     glEnable(GL_DEPTH_TEST);
-    mesh.init(32, 32);
+    mesh.init(128, 128);
+    perlin.noise(512, 512, mesh);
 }
 
 void display(){

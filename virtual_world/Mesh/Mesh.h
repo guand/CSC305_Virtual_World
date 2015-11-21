@@ -75,11 +75,47 @@ public:
         
         ///--- Load texture
         glGenTextures(1, &_tex);
+//        glBindTexture(GL_TEXTURE_2D, _tex);
+//        glfwLoadTexture2D("Mesh/texture.tga", 0);
+//        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glUniform1i(glGetUniformLocation(_pid, "tex"), 0 /*GL_TEXTURE0*/);
+    }
+
+    void loadTextureR32F(void * pTex, int width, int height)
+    {
         glBindTexture(GL_TEXTURE_2D, _tex);
-        glfwLoadTexture2D("Mesh/texture.tga", 0);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glUniform1i(glGetUniformLocation(_pid, "tex"), 0 /*GL_TEXTURE0*/);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, width,
+                        height, 0, GL_RED, GL_FLOAT,
+                        pTex);
+    }
+
+    void loadTextureRGB32F(void * pTex, int width, int height)
+    {
+        glBindTexture(GL_TEXTURE_2D, _tex);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width,
+                        height, 0, GL_RGB, GL_FLOAT,
+                        pTex);
+    }
+
+    void loadTextureRGBA8UBYTE(void * pTex, int width, int height)
+    {
+        glBindTexture(GL_TEXTURE_2D, _tex);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width,
+                        height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                        pTex);
     }
            
     void cleanup(){
