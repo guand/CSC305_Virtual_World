@@ -25,7 +25,7 @@ float f(float t)
 RGBImage baseNoise(int width, int height)
 {
     RGBImage _base(width, height);
-    std::srand(1);
+    std::srand(3);
     for (int i = 0; i < width; ++ i)
     {
         for (int j = 0; j < height; ++ j)
@@ -40,8 +40,6 @@ RGBImage baseNoise(int width, int height)
     }
     return _base;
 }
-
-
 
 float perlinNoise(int i, int j, int width, int height, float frequency, int period, const RGBImage& base)
 {

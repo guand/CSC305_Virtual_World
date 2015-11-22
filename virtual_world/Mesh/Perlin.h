@@ -6,14 +6,14 @@ class Perlin{
 private:
     typedef Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> GreyLevelImage;
     typedef Eigen::Matrix<Eigen::Vector3f, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> RGBImage;
-    int _octave = 4;
+    int _octave = 9;
 
 private:
     RGBImage _baseNoise(int width, int height)
     {
         RGBImage _base(width, height);
 
-        std::srand(1);
+        std::srand(9);
         for (int i = 0; i < width; ++ i)
         {
             for (int j = 0; j < height; ++ j)
@@ -122,7 +122,7 @@ public:
         //TODO: change the following code so we can make a single frequency perlin noise
         RGBImage base = _baseNoise(width, height);
 
-        int period = 128;
+        int period = 512;
         float frequency = 1.0f / period;
         RGBImage PerlinNoise(width, height);
         for (int i = 0; i < width; ++ i)

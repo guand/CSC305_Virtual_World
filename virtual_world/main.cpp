@@ -13,8 +13,8 @@ void init(){
     glfwEnable(GLFW_KEY_REPEAT);     
     glClearColor(1,1,1, /*solid*/1.0 );    
     glEnable(GL_DEPTH_TEST);
-    mesh.init(128, 128);
-    perlin.noise(512, 512, mesh);
+    mesh.init(256, 256);
+    perlin.noise(1024, 1024, mesh);
 }
 
 void display(){
