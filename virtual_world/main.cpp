@@ -4,17 +4,29 @@
 
 int window_width = 1024;
 int window_height = 640;
+int noise_width = 512;
+int noise_height = 512;
+int mesh_width = 128;
+int mesh_height = 128;
+int octave = 8;
+int period = 256;
+int seed = 3;
+float lacunarity = 2.0;
+float gain = 0.5;
 
 Mesh mesh;
-Perlin perlin;
 float theta = 30; //< camera angle
 
 void init(){
     glfwEnable(GLFW_KEY_REPEAT);     
     glClearColor(1,1,1, /*solid*/1.0 );    
     glEnable(GL_DEPTH_TEST);
-    mesh.init(256, 256);
-    perlin.noise(1024, 1024, mesh);
+    mesh.init(mesh_width, mesh_height);
+    Perlin perlin = Perlin(octave, period, seed, noise_width, noise_height, lacunarity, gain);
+    perlin.setBase();
+//    perlin.setNormalNoiseMesh(mesh);
+//    perlin.setRiggedNoiseMesh(mesh);
+    perlin.setIQNoiseMesh(mesh);
 }
 
 void display(){

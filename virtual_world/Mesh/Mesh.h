@@ -9,7 +9,11 @@ protected:
     GLuint _vao; ///< vertex array object
     GLuint _pid; ///< GLSL shader program ID
     GLuint _tex; ///< Texture ID
-    GLuint _tex_night; ///< Texture ID  
+    GLuint _grass;
+    GLuint _rock;
+    GLuint _sand;
+    GLuint _snow;
+    GLuint _water;
     GLuint _vpoint;    ///< memory buffer
     GLuint _vnormal;   ///< memory buffer
     std::vector<vec3> _triangulation;
@@ -39,7 +43,7 @@ public:
 
         glGenBuffers(1, &_vpoint);
         glBindBuffer(GL_ARRAY_BUFFER, _vpoint);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Vec3)*_triangulation.size(), &_triangulation[0], GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vec3)*_triangulation.size(), &_triangulation[0], GL_STATIC_DRAW);
         check_error_gl();        
     
         ///--- Normal Buffer
@@ -75,10 +79,6 @@ public:
         
         ///--- Load texture
         glGenTextures(1, &_tex);
-//        glBindTexture(GL_TEXTURE_2D, _tex);
-//        glfwLoadTexture2D("Mesh/texture.tga", 0);
-//        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glUniform1i(glGetUniformLocation(_pid, "tex"), 0 /*GL_TEXTURE0*/);
     }
 
@@ -127,6 +127,8 @@ public:
             ///--- Setup the texture units
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, _tex);
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, _grass);
             glUniform1f(glGetUniformLocation(_pid, "time"), glfwGetTime());
             glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
             glDrawElements(GL_TRIANGLE_STRIP, /*#vertices*/ _triangulation_index.size(), GL_UNSIGNED_INT, ZERO_BUFFER_OFFSET);
