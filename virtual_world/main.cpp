@@ -1,7 +1,7 @@
 #include "icg_common.h"
 #include "Mesh/mesh.h"
-#include "Mesh/perlin.h"
-#include "Mesh/fractal.h"
+#include "Noise/perlin.h"
+#include "Noise/fractal.h"
 
 int window_width = 1024;
 int window_height = 640;

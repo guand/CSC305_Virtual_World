@@ -3,7 +3,7 @@
 
 #pragma once
 #include "icg_common.h"
-#include "mesh.h"
+#include "../Mesh/mesh.h"
 #include "noise.h"
 
 class Perlin : public Noise {
