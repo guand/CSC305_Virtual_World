@@ -15,7 +15,7 @@ uniform sampler2D tex_grass;
 //vec3 F = vec3(.133,.545,.133);
 //vec3 O = vec3(.255,.412,.882);
 //vec3 L = vec3(.498,1,.831);
-vec3 Y = vec3(1,1,0);
+vec3 Y = vec3(0,0,1);
 vec3 G = vec3(0,1,0);
 void main() {
 

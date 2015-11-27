@@ -1,26 +1,13 @@
+#ifndef PERLIN
+#define PERLIN
+
 #pragma once
 #include "icg_common.h"
-#include "Mesh.h"
+#include "mesh.h"
+#include "noise.h"
 
-class Perlin{
-private:
-    typedef Eigen::Matrix<Eigen::Vector3f, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> RGBImage;
-    int octave;
-    int period;
-    int seed;
-    int width;
-    int height;
-    float lacunarity;
-    float gain;
-    RGBImage base;
-
-private:
-    //return a random floating point number between [0, 1]
-    float rand0_1()
-    {
-        return ((float) std::rand())/((float) RAND_MAX);
-    }
-
+class Perlin : public Noise {
+protected:
     float mix(float x, float y, float alpha)
     {
         return y * alpha + x * (1.0f - alpha);
@@ -109,134 +96,6 @@ private:
 
         return vec3(noise, f2x, f2y);
     }
-
-    float iqTurbulence(int i, int j, int _period)
-    {
-        float sum = 0.5;
-        float p = _period;
-        float amplitude = 1.0;
-        vec2 dsum = vec2(0, 0);
-        for(int k = 0; k < this->octave; ++k)
-        {
-            vec3 noise = this->pseudoPerlinNoise(i, j, p);
-            dsum(0) += noise(1);
-            dsum(1) += noise(2);
-
-            sum += amplitude * noise(0) / (1 + dsum.dot(dsum));
-            p *= 1 / this->lacunarity;
-            amplitude *= this->gain;
-        }
-        return sum;
-    }
-
-    float turbulence(int i, int j, int _period)
-    {
-        float sum = 0;
-        float p = _period;
-        float amplitude = 1.0;
-        for(int k = 0; k < this->octave; ++k)
-        {
-            float noise = this->perlinNoise(i, j, p);
-            sum += noise*amplitude;
-            p *= 1 / this->lacunarity;
-            amplitude *= this->gain;
-        }
-        return sum;
-    }
-
-    float riggedNoise(int i, int j, int _period)
-    {
-        return .3f - abs(this->perlinNoise(i, j, _period));
-    }
-
-    float riggedTurbulence(int i, int j, int _period)
-    {
-        float sum = 0;
-        float p = _period;
-        float amplitude = 1.0;
-        for(int k = 0; k < this->octave; ++k)
-        {
-            float noise = this->riggedNoise(i, j, p);
-            sum += noise*amplitude;
-            p *= 1 / this->lacunarity;
-            amplitude *= this->gain;
-        }
-        return sum;
-    }
-
-
-public:
-    Perlin(int octave, int period, int seed, int width, int height, float lacunarity, float gain)
-    {
-        this->octave = octave;
-        this->period = period;
-        this->seed = seed;
-        this->width = width;
-        this->height = height;
-        this->lacunarity = lacunarity;
-        this->gain = gain;
-    }
-
-    void setBase()
-    {
-        std::srand(this->seed);
-        RGBImage _base(this->width, this->height);
-        for(int i = 0; i < this->width; ++i)
-        {
-            for(int j = 0; j < this->height; ++j)
-            {
-                vec3 randGradientVec;
-                randGradientVec(0) = cos(2 * M_PI * this->rand0_1());
-                randGradientVec(1) = sin(2 * M_PI * this->rand0_1());
-                randGradientVec(2) = 0;
-                _base(i, j) = randGradientVec;
-            }
-        }
-        this->base = _base;
-    }
-
-    void setImage(RGBImage & image, Mesh & mesh)
-    {
-        unsigned int _width = image.rows();
-        unsigned int _height = image.cols();
-        //After the openGL context is set up, copy data into an openGL texture
-        mesh.loadTextureRGB32F(image.data(), _width, _height);
-    }
-
-    void setNormalNoiseMesh(Mesh & mesh)
-    {
-        RGBImage PerlinNoise(this->width, this->height);
-        for (int i = 0; i < this->width; ++i)
-            for (int j = 0; j < this->height; ++j)
-            {
-                float noise = this->turbulence(i, j, this->period);
-                PerlinNoise(i, j) = vec3(noise, noise, noise);
-            }
-        setImage(PerlinNoise, mesh);
-    }
-
-    void setRiggedNoiseMesh(Mesh & mesh)
-    {
-        RGBImage PerlinNoise(this->width, this->height);
-        for (int i = 0; i < this->width; ++i)
-            for (int j = 0; j < this->height; ++j)
-            {
-                float noise = this->riggedTurbulence(i, j, this->period);
-                PerlinNoise(i, j) = vec3(noise, noise, noise);
-            }
-        setImage(PerlinNoise, mesh);
-    }
-
-    void setIQNoiseMesh(Mesh & mesh)
-    {
-        RGBImage PerlinNoise(this->width, this->height);
-        for (int i = 0; i < this->width; ++i)
-            for (int j = 0; j < this->height; ++j)
-            {
-                float noise = this->iqTurbulence(i, j, this->period);
-                PerlinNoise(i, j) = vec3(noise, noise, noise);
-            }
-        setImage(PerlinNoise, mesh);
-    }
-
 };
+
+#endif // PERLIN

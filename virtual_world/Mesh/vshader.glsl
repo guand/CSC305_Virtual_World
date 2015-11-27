@@ -3,7 +3,7 @@ uniform float time;
 in vec3 vpoint; ///< [-1,+1]
 out float vheight; ///< for debug coloring
 out vec2 uv;
-out float scale=.5;
+out float scale=0.5;
 
 uniform mat4 MODEL;
 uniform mat4 VIEW;

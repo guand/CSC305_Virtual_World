@@ -18,6 +18,7 @@ protected:
     GLuint _vnormal;   ///< memory buffer
     std::vector<vec3> _triangulation;
     std::vector<int> _triangulation_index;
+    typedef Eigen::Matrix<Eigen::Vector3f, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> RGBImage;
 
 public:        
     GLuint getProgramID(){ 
@@ -116,6 +117,14 @@ public:
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width,
                         height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
                         pTex);
+    }
+
+    void setImage(RGBImage & image)
+    {
+        unsigned int _width = image.rows();
+        unsigned int _height = image.cols();
+        //After the openGL context is set up, copy data into an openGL texture
+        loadTextureRGB32F(image.data(), _width, _height);
     }
            
     void cleanup(){

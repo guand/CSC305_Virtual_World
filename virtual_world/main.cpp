@@ -1,6 +1,7 @@
 #include "icg_common.h"
-#include "Mesh/Mesh.h"
-#include "Mesh/Perlin.h"
+#include "Mesh/mesh.h"
+#include "Mesh/perlin.h"
+#include "Mesh/fractal.h"
 
 int window_width = 1024;
 int window_height = 640;
@@ -8,12 +9,18 @@ int noise_width = 512;
 int noise_height = 512;
 int mesh_width = 128;
 int mesh_height = 128;
-int octave = 8;
+float octave = 4.0;
 int period = 256;
-int seed = 3;
+int seed = 1;
 float lacunarity = 2.0;
-float gain = 0.5;
-
+float gain = 0.50;
+typedef Eigen::Matrix<Eigen::Vector3f, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> RGBImage;
+enum turbulance {
+    NORMAL_T,
+    RIGID_T,
+    IQ_T
+};
+turbulance fractal_type = NORMAL_T;
 Mesh mesh;
 float theta = 30; //< camera angle
 
@@ -22,12 +29,31 @@ void init(){
     glClearColor(1,1,1, /*solid*/1.0 );    
     glEnable(GL_DEPTH_TEST);
     mesh.init(mesh_width, mesh_height);
-    Perlin perlin = Perlin(octave, period, seed, noise_width, noise_height, lacunarity, gain);
-    perlin.setBase();
-//    perlin.setNormalNoiseMesh(mesh);
-//    perlin.setRiggedNoiseMesh(mesh);
-    perlin.setIQNoiseMesh(mesh);
+    Fractal fractal = Fractal(octave, period, seed, noise_width, noise_height, lacunarity, gain);
+    fractal.init();
+    RGBImage perlin_fractal;
+    switch(fractal_type)
+    {
+    case NORMAL_T:
+        perlin_fractal = fractal.setNormalNoiseMesh();
+        break;
+    case RIGID_T:
+        perlin_fractal = fractal.setRiggedNoiseMesh();
+        break;
+    case IQ_T:
+        perlin_fractal = fractal.setIQNoiseMesh();
+        break;
+    default:
+        std::cout << "Something Broke!!!" << std::endl;
+        break;
+    }
+
+//    perlin.setNormalNoiseMesh();
+//    perlin.setRiggedNoiseMesh();
+    mesh.setImage(perlin_fractal);
 }
+
+
 
 void display(){
     opengp::update_title_fps("Intro. to Computer Graphics");   
