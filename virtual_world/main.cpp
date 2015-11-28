@@ -22,7 +22,7 @@ enum turbulance {
     IQ_T,
     HYBRID_T
 };
-turbulance fractal_type = IQ_T;
+turbulance fractal_type = HYBRID_T;
 Mesh mesh;
 float theta = 30; //< camera angle
 

@@ -19,19 +19,19 @@ protected:
     std::vector<vec3> _triangulation;
     std::vector<int> _triangulation_index;
     std::vector<vec3> _normal_vertices;
-    typedef Eigen::Matrix<Eigen::Vector3f, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> RGBImage;
+    typedef Eigen::Matrix<Eigen::Vector3f, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> bufferMatrix;
 
 public:        
     GLuint getProgramID(){ 
         return _pid; 
     }
     
-    void init(RGBImage & image, int mHeight, int mWidth){
+    void init(bufferMatrix & image, int mHeight, int mWidth){
         ///--- Vertex one vertex Array
         glGenVertexArrays(1, &_vao);
         glBindVertexArray(_vao);
         check_error_gl();                      
-        
+        bufferMatrix _triangulation_matrix(mWidth, mHeight);
         ///--- Vertex Buffer
         for(int i = 0; i < mWidth; ++i)
         {
@@ -53,22 +53,32 @@ public:
         check_error_gl();        
     
         ///--- Normal Buffer
-        RGBImage _normal_vector0(mWidth-1, mHeight-1);
-        RGBImage _normal_vector1(mWidth-1, mHeight-1);
+        bufferMatrix _normal_vector0(mWidth-1, mHeight-1);
+        bufferMatrix _normal_vector1(mWidth-1, mHeight-1);
         int nIncrementor = 0;
         for(int i = 0; i < mWidth-1; ++i)
         {
             for(int j = 0; j < mHeight-1; ++j)
             {
+//                vec3 vTriangle0[] = {
+//                    _triangulation.at(nIncrementor),
+//                    _triangulation.at(nIncrementor+mWidth),
+//                    _triangulation.at(nIncrementor+mWidth+1)
+//                };
+//                vec3 vTriangle1[] = {
+//                    _triangulation.at(nIncrementor+mWidth+1),
+//                    _triangulation.at(nIncrementor+1),
+//                    _triangulation.at(nIncrementor)
+//                };
                 vec3 vTriangle0[] = {
                     _triangulation.at(nIncrementor),
                     _triangulation.at(nIncrementor+mWidth),
-                    _triangulation.at(nIncrementor+mWidth+1)
+                    _triangulation.at(nIncrementor+1)
                 };
                 vec3 vTriangle1[] = {
                     _triangulation.at(nIncrementor+mWidth+1),
                     _triangulation.at(nIncrementor+1),
-                    _triangulation.at(nIncrementor)
+                    _triangulation.at(nIncrementor+mWidth)
                 };
 
                 vec3 vTriangleNormal0 = (vTriangle0[0] - vTriangle0[1]).cross(vTriangle0[1] - vTriangle0[2]);
@@ -183,7 +193,7 @@ public:
                         pTex);
     }
 
-    void setImage(RGBImage & image)
+    void setImage(bufferMatrix & image)
     {
         unsigned int _width = image.rows();
         unsigned int _height = image.cols();
