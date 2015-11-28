@@ -10,17 +10,19 @@ int noise_height = 512;
 int mesh_width = 128;
 int mesh_height = 128;
 float octave = 4.0;
-int period = 256;
-int seed = 1;
+int period = 128;
+int seed = 3;
 float lacunarity = 2.0;
-float gain = 0.50;
+float gain = 0.5;
+float offset = 0.5;
 typedef Eigen::Matrix<Eigen::Vector3f, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> RGBImage;
 enum turbulance {
     NORMAL_T,
     RIGID_T,
-    IQ_T
+    IQ_T,
+    HYBRID_T
 };
-turbulance fractal_type = NORMAL_T;
+turbulance fractal_type = IQ_T;
 Mesh mesh;
 float theta = 30; //< camera angle
 
@@ -28,29 +30,28 @@ void init(){
     glfwEnable(GLFW_KEY_REPEAT);     
     glClearColor(1,1,1, /*solid*/1.0 );    
     glEnable(GL_DEPTH_TEST);
-    mesh.init(mesh_width, mesh_height);
-    Fractal fractal = Fractal(octave, period, seed, noise_width, noise_height, lacunarity, gain);
+    Fractal fractal = Fractal(octave, period, seed, noise_width, noise_height, lacunarity, gain, offset);
     fractal.init();
     RGBImage perlin_fractal;
     switch(fractal_type)
     {
     case NORMAL_T:
-        perlin_fractal = fractal.setNormalNoiseMesh();
+        perlin_fractal = fractal.setNormalNoise();
         break;
     case RIGID_T:
-        perlin_fractal = fractal.setRiggedNoiseMesh();
+        perlin_fractal = fractal.setRigidNoise();
         break;
     case IQ_T:
-        perlin_fractal = fractal.setIQNoiseMesh();
+        perlin_fractal = fractal.setIQNoise();
         break;
+    case HYBRID_T:
+        perlin_fractal = fractal.setHybridNoise();
     default:
         std::cout << "Something Broke!!!" << std::endl;
         break;
     }
-
-//    perlin.setNormalNoiseMesh();
-//    perlin.setRiggedNoiseMesh();
-    mesh.setImage(perlin_fractal);
+    mesh.init(perlin_fractal, mesh_height, mesh_width);
+//    mesh.setImage(perlin_fractal);
 }
 
 

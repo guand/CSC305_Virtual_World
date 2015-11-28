@@ -91,10 +91,10 @@ protected:
         float uv = this->mix(u, v, fx);
         float noise = this->mix(st, uv, fy);
 
-        float f2x = this->f2(dx) * ( (t-s) + (s-t-v+u)* fy);
-        float f2y = this->f2(dy) * ( (v-s) + (s-t-v+u)* fx);
+//        float f2x = this->f2(dx) * ( (t-s) + (s-t-v+u)* fy);
+//        float f2y = this->f2(dy) * ( (v-s) + (s-t-v+u)* fx);
 
-        return vec3(noise, f2x, f2y);
+        return vec3(noise, noise, noise);
     }
 };
 

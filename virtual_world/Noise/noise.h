@@ -14,6 +14,7 @@ protected:
     int height;
     float lacunarity;
     float gain;
+    float offset;
     std::vector<float> exponent_array;
     RGBImage base;
 

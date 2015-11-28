@@ -18,6 +18,7 @@ protected:
     GLuint _vnormal;   ///< memory buffer
     std::vector<vec3> _triangulation;
     std::vector<int> _triangulation_index;
+    std::vector<vec3> _normal_vertices;
     typedef Eigen::Matrix<Eigen::Vector3f, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> RGBImage;
 
 public:        
@@ -25,20 +26,24 @@ public:
         return _pid; 
     }
     
-    void init(int xCoord, int yCoord){
+    void init(RGBImage & image, int mHeight, int mWidth){
         ///--- Vertex one vertex Array
         glGenVertexArrays(1, &_vao);
         glBindVertexArray(_vao);
         check_error_gl();                      
         
         ///--- Vertex Buffer
-        for(int i = 0; i < xCoord; ++i)
+        for(int i = 0; i < mWidth; ++i)
         {
-            for(int j = 0; j < yCoord; ++j)
+            for(int j = 0; j < mHeight; ++j)
             {
-                float xScale = float(i)/float(xCoord-1);
-                float yScale = float(j)/float(yCoord-1);
-                _triangulation.push_back(vec3(-1.0 + (xScale * 2), -1.0 + (yScale * 2), 0.0));
+                float xScale = float(i)/float(mWidth-1);
+                float yScale = float(j)/float(mHeight-1);
+
+                vec3 iColor = image(i * (image.rows()/mWidth), j * (image.cols()/mHeight));
+                float zheight = iColor(0) * 0.5;
+                if(iColor(0) < 0.0f) zheight = 0.0;
+                _triangulation.push_back(vec3(-1.0 + (xScale * 2), -1.0 + (yScale * 2), zheight));
             }
         }
 
@@ -48,19 +53,78 @@ public:
         check_error_gl();        
     
         ///--- Normal Buffer
+        RGBImage _normal_vector0(mWidth-1, mHeight-1);
+        RGBImage _normal_vector1(mWidth-1, mHeight-1);
+        int nIncrementor = 0;
+        for(int i = 0; i < mWidth-1; ++i)
+        {
+            for(int j = 0; j < mHeight-1; ++j)
+            {
+                vec3 vTriangle0[] = {
+                    _triangulation.at(nIncrementor),
+                    _triangulation.at(nIncrementor+mWidth),
+                    _triangulation.at(nIncrementor+mWidth+1)
+                };
+                vec3 vTriangle1[] = {
+                    _triangulation.at(nIncrementor+mWidth+1),
+                    _triangulation.at(nIncrementor+1),
+                    _triangulation.at(nIncrementor)
+                };
 
+                vec3 vTriangleNormal0 = (vTriangle0[0] - vTriangle0[1]).cross(vTriangle0[1] - vTriangle0[2]);
+                vec3 vTriangleNormal1 = (vTriangle1[0] - vTriangle1[1]).cross(vTriangle1[1] - vTriangle1[2]);
+                vTriangleNormal0.normalize();
+                vTriangleNormal1.normalize();
+                _normal_vector0(i, j) = vTriangleNormal0;
+                _normal_vector1(i, j) = vTriangleNormal1;
+                nIncrementor++;
+            }
+        }
+
+        for(int i = 0; i < mWidth-1; ++i)
+        {
+            for(int j = 0; j < mHeight-1; ++j)
+            {
+                vec3 normal_vertex = vec3(0.0, 0.0, 0.0);
+                if(i != 0 && j != 0)
+                {
+                    normal_vertex += _normal_vector0(i-1, j-1);
+                    normal_vertex += _normal_vector1(i-1, j-1);
+                }
+                if(i != 0 && j != mHeight-1)
+                {
+                    normal_vertex += _normal_vector0(i-1, j);
+                }
+                if(i != mWidth-1 && j != mHeight-1)
+                {
+                    normal_vertex += _normal_vector0(i, j);
+                    normal_vertex += _normal_vector1(i, j);
+                }
+                if(i != mWidth-1 && j != 0)
+                {
+                         normal_vertex += _normal_vector1(i, j-1);
+                }
+                normal_vertex.normalize();
+                _normal_vertices.push_back(normal_vertex);
+            }
+        }
+
+        glGenBuffers(ONE, &_vnormal);
+        glBindBuffer(GL_ARRAY_BUFFER, _vnormal);
+        glBufferData(GL_ARRAY_BUFFER, _normal_vertices.size() * sizeof(vec3), &_normal_vertices[0], GL_STATIC_DRAW);
+        check_error_gl();
     
         ///--- Index Buffer
         int incrementor = 0;
-        for(int i = 0; i < xCoord-1; ++i)
+        for(int i = 0; i < mWidth-1; ++i)
         {
-            for(int j = 0; j < yCoord; ++j)
+            for(int j = 0; j < mHeight; ++j)
             {
                 _triangulation_index.push_back(incrementor);
-                _triangulation_index.push_back(incrementor+xCoord);
+                _triangulation_index.push_back(incrementor+mWidth);
                 incrementor++;
             }
-            if(i < xCoord-2) _triangulation_index.push_back(xCoord*yCoord);
+            if(i < image.rows()-2) _triangulation_index.push_back(mWidth*mHeight);
         }
 
 
@@ -70,7 +134,7 @@ public:
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _vbo_indices);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, _triangulation_index.size() * sizeof(unsigned int), &_triangulation_index[0], GL_STATIC_DRAW);
         glEnable(GL_PRIMITIVE_RESTART);
-        glPrimitiveRestartIndex(xCoord*yCoord);
+        glPrimitiveRestartIndex(mWidth*mHeight);
         check_error_gl();        
 
         ///--- Compile the shaders

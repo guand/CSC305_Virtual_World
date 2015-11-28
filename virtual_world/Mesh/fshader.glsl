@@ -1,6 +1,7 @@
 #version 330 core
 out vec3 color;
 in vec3 fpoint;
+in vec3 fnormal_cam;
 in float vheight; ///< for debug coloring
 in float scale; ///< to normalize color range
 in vec2 uv;
@@ -18,19 +19,10 @@ uniform sampler2D tex_grass;
 vec3 Y = vec3(0,0,1);
 vec3 G = vec3(0,1,0);
 void main() {
-
-  float fscale = (vheight /scale) * 4;
-//  if(vheight > 0.2)
-//  {
-//    color = mix(M,Y, fscale/2);
-//  } else if (vheight > 0.1)
-//  {
-//    color = mix(LM,M, fscale);
-//  } else if (vheight > 0.0) {
-//    color = mix(LF,F, fscale);
-//  } else {
-//    color = mix(O,L, fscale);
-//  }
-  color = mix(Y,G, vheight/scale);
-//  color = texture(tex_grass, uv).rgb;
+  float fscale = (vheight /scale);
+  vec3 base_color = mix(Y,G, fscale);
+  vec3 N = normalize(fnormal_cam);
+  vec3 L = vec3(0,0,1);
+  float lamb = dot( N, L );
+  color = base_color * lamb;
 }

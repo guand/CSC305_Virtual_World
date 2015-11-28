@@ -6,6 +6,13 @@
 
 class Fractal : public Perlin {
 private:
+    /**
+     * @brief iqTurbulence
+     * @param i
+     * @param j
+     * @param _period
+     * @return Modified IQ turbulance
+     */
     float iqTurbulence(int i, int j, int _period)
     {
         float sum = 0.5;
@@ -30,6 +37,13 @@ private:
         return sum;
     }
 
+    /**
+     * @brief turbulence
+     * @param i
+     * @param j
+     * @param _period
+     * @return Basic turbulence function
+     */
     float turbulence(int i, int j, int _period)
     {
         float sum = 0;
@@ -47,30 +61,64 @@ private:
         return sum;
     }
 
-    float riggedNoise(int i, int j, int _period)
+    float rigidNoise(int i, int j, int _period)
     {
-        return .3f - abs(this->perlinNoise(i, j, _period)*1.7f);
+        return .3f - abs(this->perlinNoise(i, j, _period));
     }
 
-    float riggedTurbulence(int i, int j, int _period)
+    /**
+     * @brief riggedTurbulence
+     * @param i
+     * @param j
+     * @param _period
+     * @return rigid turbulence
+     */
+    float rigidTurbulence(int i, int j, int _period)
     {
         float sum = 0;
         float p = _period;
         for(int k = 0; k < int(this->octave); ++k)
         {
-            float noise = this->riggedNoise(i, j, p);
+            float noise = this->rigidNoise(i, j, p);
             sum += noise*this->exponent_array.at(k);
             p *= 1 / this->lacunarity;
         }
 
         float remainder = this->octave - int(this->octave);
         if(remainder)
-            sum += remainder * this->riggedNoise(i, j, p) * this->exponent_array.at(int(this->octave) + 1);
+            sum += remainder * this->perlinNoise(i, j, p) * this->exponent_array.at(int(this->octave) + 1);
+        return sum;
+    }
+
+    float hybridNoise(int i, int j, int _period)
+    {
+        return this->perlinNoise(i, j, _period) + this->offset;
+    }
+
+    float hybridTurbulence(int i, int j, int _period)
+    {
+        float sum = 0;
+        float p = _period;
+        float result = this->hybridNoise(i, j, p) * this->exponent_array.at(0);
+        float weight = result;
+        for(int k = 1; k < int(this->octave); ++k)
+        {
+            if( weight > 1.0 ) weight = 1.0;
+
+            float noise = this->hybridNoise(i, j, p);
+            sum += noise*this->exponent_array.at(k)*weight;
+            p *= 1 / this->lacunarity;
+            weight *= sum;
+        }
+
+        float remainder = this->octave - int(this->octave);
+        if(remainder)
+            sum += remainder * this->perlinNoise(i, j, p) * this->exponent_array.at(int(this->octave) + 1);
         return sum;
     }
 
 public:
-    Fractal(float octave, int period, int seed, int width, int height, float lacunarity, float gain)
+    Fractal(float octave, int period, int seed, int width, int height, float lacunarity, float gain, float offset)
     {
         this->octave = octave;
         this->period = period;
@@ -79,9 +127,10 @@ public:
         this->height = height;
         this->lacunarity = lacunarity;
         this->gain = gain;
+        this->offset = offset;
     }
 
-    RGBImage setNormalNoiseMesh()
+    RGBImage setNormalNoise()
     {
         RGBImage PerlinNoise(this->width, this->height);
         for (int i = 0; i < this->width; ++i)
@@ -93,25 +142,37 @@ public:
         return PerlinNoise;
     }
 
-    RGBImage setRiggedNoiseMesh()
+    RGBImage setRigidNoise()
     {
         RGBImage PerlinNoise(this->width, this->height);
         for (int i = 0; i < this->width; ++i)
             for (int j = 0; j < this->height; ++j)
             {
-                float noise = this->riggedTurbulence(i, j, this->period);
+                float noise = this->rigidTurbulence(i, j, this->period);
                 PerlinNoise(i, j) = vec3(noise, noise, noise);
             }
         return PerlinNoise;
     }
 
-    RGBImage setIQNoiseMesh()
+    RGBImage setIQNoise()
     {
         RGBImage PerlinNoise(this->width, this->height);
         for (int i = 0; i < this->width; ++i)
             for (int j = 0; j < this->height; ++j)
             {
                 float noise = this->iqTurbulence(i, j, this->period);
+                PerlinNoise(i, j) = vec3(noise, noise, noise);
+            }
+        return PerlinNoise;
+    }
+
+    RGBImage setHybridNoise()
+    {
+        RGBImage PerlinNoise(this->width, this->height);
+        for (int i = 0; i < this->width; ++i)
+            for (int j = 0; j < this->height; ++j)
+            {
+                float noise = this->hybridTurbulence(i, j, this->period);
                 PerlinNoise(i, j) = vec3(noise, noise, noise);
             }
         return PerlinNoise;
