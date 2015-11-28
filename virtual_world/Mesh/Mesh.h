@@ -16,34 +16,43 @@ protected:
     GLuint _water;
     GLuint _vpoint;    ///< memory buffer
     GLuint _vnormal;   ///< memory buffer
+    GLuint _vtexcoord;
     std::vector<vec3> _triangulation;
-    std::vector<int> _triangulation_index;
     std::vector<vec3> _normal_vertices;
+    std::vector<vec2> _triangulation_tex;
+    std::vector<int> _triangulation_index;
     typedef Eigen::Matrix<Eigen::Vector3f, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> bufferMatrix;
 
 public:        
     GLuint getProgramID(){ 
         return _pid; 
     }
-    
+
     void init(bufferMatrix & image, int mHeight, int mWidth){
         ///--- Vertex one vertex Array
         glGenVertexArrays(1, &_vao);
         glBindVertexArray(_vao);
-        check_error_gl();                      
+        check_error_gl();
+
+        float f_tex_u = float(mWidth) * .2f;
+        float f_tex_v = float(mHeight) * .2f;
         bufferMatrix _triangulation_matrix(mWidth, mHeight);
         ///--- Vertex Buffer
         for(int i = 0; i < mWidth; ++i)
         {
             for(int j = 0; j < mHeight; ++j)
             {
-                float xScale = float(i)/float(mWidth-1);
-                float yScale = float(j)/float(mHeight-1);
-
-                vec3 iColor = image(i * (image.rows()/mWidth), j * (image.cols()/mHeight));
-                float zheight = iColor(0) * 0.5;
-                if(iColor(0) < 0.0f) zheight = 0.0;
-                _triangulation.push_back(vec3(-1.0 + (xScale * 2), -1.0 + (yScale * 2), zheight));
+                float x_scale = float(i)/float(mWidth-1);
+                float y_scale = float(j)/float(mHeight-1);
+                float x_vertex_pt = -1.0 + (x_scale * 2);
+                float y_vertex_pt = -1.0 + (y_scale * 2);
+                float img_scale_width = image.rows()/float(mWidth);
+                float img_scale_height = image.cols()/float(mHeight);
+                vec3 iColor = image(i * img_scale_width, j * img_scale_height);
+                float z_height = iColor(0)*0.5;
+                if(iColor(0) < 0.0f) z_height = 0.0;
+                _triangulation.push_back(vec3(x_vertex_pt, y_vertex_pt, z_height));
+                _triangulation_tex.push_back(vec2(x_scale * f_tex_u, y_scale * f_tex_v));
             }
         }
 
@@ -60,16 +69,6 @@ public:
         {
             for(int j = 0; j < mHeight-1; ++j)
             {
-//                vec3 vTriangle0[] = {
-//                    _triangulation.at(nIncrementor),
-//                    _triangulation.at(nIncrementor+mWidth),
-//                    _triangulation.at(nIncrementor+mWidth+1)
-//                };
-//                vec3 vTriangle1[] = {
-//                    _triangulation.at(nIncrementor+mWidth+1),
-//                    _triangulation.at(nIncrementor+1),
-//                    _triangulation.at(nIncrementor)
-//                };
                 vec3 vTriangle0[] = {
                     _triangulation.at(nIncrementor),
                     _triangulation.at(nIncrementor+mWidth),
@@ -152,66 +151,66 @@ public:
         if(!_pid) exit(EXIT_FAILURE);
         glUseProgram(_pid);
         
+        {
+
+            glGenBuffers(1, &_vtexcoord);
+            glBindBuffer(GL_ARRAY_BUFFER, _vtexcoord);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(vec2)*_triangulation_tex.size(), &_triangulation_tex[0], GL_STATIC_DRAW);
+            GLuint vtexcoord_id = glGetAttribLocation(_pid, "vtexcoord");
+            glEnableVertexAttribArray(vtexcoord_id);
+            glVertexAttribPointer(vtexcoord_id, 2, GL_FLOAT, DONT_NORMALIZE, ZERO_STRIDE, ZERO_BUFFER_OFFSET);
+        }
         ///--- Load texture
-        glGenTextures(1, &_tex);
-        glUniform1i(glGetUniformLocation(_pid, "tex"), 0 /*GL_TEXTURE0*/);
-    }
-
-    void loadTextureR32F(void * pTex, int width, int height)
-    {
-        glBindTexture(GL_TEXTURE_2D, _tex);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glGenTextures(1, &_grass);
+        glBindTexture(GL_TEXTURE_2D, _grass);
+        glfwLoadTexture2D("Mesh/grass.tga", 0);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, width,
-                        height, 0, GL_RED, GL_FLOAT,
-                        pTex);
-    }
-
-    void loadTextureRGB32F(void * pTex, int width, int height)
-    {
-        glBindTexture(GL_TEXTURE_2D, _tex);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glUniform1i(glGetUniformLocation(_pid, "grass_tex"), 0 /*GL_TEXTURE0*/);
+        glGenTextures(1, &_rock);
+        glBindTexture(GL_TEXTURE_2D, _rock);
+        glfwLoadTexture2D("Mesh/rock.tga", 1);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width,
-                        height, 0, GL_RGB, GL_FLOAT,
-                        pTex);
-    }
-
-    void loadTextureRGBA8UBYTE(void * pTex, int width, int height)
-    {
-        glBindTexture(GL_TEXTURE_2D, _tex);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glUniform1i(glGetUniformLocation(_pid, "rock_tex"), 1 /*GL_TEXTURE1*/);
+        glGenTextures(1, &_sand);
+        glBindTexture(GL_TEXTURE_2D, _sand);
+        glfwLoadTexture2D("Mesh/sand.tga", 2);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width,
-                        height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-                        pTex);
+        glUniform1i(glGetUniformLocation(_pid, "sand_tex"), 2 /*GL_TEXTURE2*/);
+        glGenTextures(1, &_snow);
+        glBindTexture(GL_TEXTURE_2D, _snow);
+        glfwLoadTexture2D("Mesh/snow.tga", 3);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glUniform1i(glGetUniformLocation(_pid, "snow_tex"), 3 /*GL_TEXTURE3*/);
+        glGenTextures(1, &_water);
+        glBindTexture(GL_TEXTURE_2D, _water);
+        glfwLoadTexture2D("Mesh/water.tga", 4);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glUniform1i(glGetUniformLocation(_pid, "water_tex"), 4 /*GL_TEXTURE4*/);
     }
 
-    void setImage(bufferMatrix & image)
-    {
-        unsigned int _width = image.rows();
-        unsigned int _height = image.cols();
-        //After the openGL context is set up, copy data into an openGL texture
-        loadTextureRGB32F(image.data(), _width, _height);
-    }
-           
     void cleanup(){
         /// TODO
+    }
+
+    void textureDraw(GLuint id, int index)
+    {
+        glActiveTexture(GL_TEXTURE0+index);
+        glBindTexture(GL_TEXTURE_2D, id);
     }
 
     void draw(){
         bindShader();  
             ///--- Setup the texture units
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, _tex);
-            glActiveTexture(GL_TEXTURE1);
-            glBindTexture(GL_TEXTURE_2D, _grass);
+            textureDraw(_grass, 0);
+            textureDraw(_rock, 1);
+            textureDraw(_sand, 2);
+            textureDraw(_snow, 3);
+            textureDraw(_water, 4);
             glUniform1f(glGetUniformLocation(_pid, "time"), glfwGetTime());
             glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
             glDrawElements(GL_TRIANGLE_STRIP, /*#vertices*/ _triangulation_index.size(), GL_UNSIGNED_INT, ZERO_BUFFER_OFFSET);

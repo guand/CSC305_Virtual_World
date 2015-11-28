@@ -9,8 +9,8 @@ int noise_width = 512;
 int noise_height = 512;
 int mesh_width = 128;
 int mesh_height = 128;
-float octave = 4.0;
-int period = 128;
+float octave = 5.0;
+int period = 256;
 int seed = 3;
 float lacunarity = 2.0;
 float gain = 0.5;
@@ -22,7 +22,7 @@ enum turbulance {
     IQ_T,
     HYBRID_T
 };
-turbulance fractal_type = HYBRID_T;
+turbulance fractal_type = NORMAL_T;
 Mesh mesh;
 float theta = 30; //< camera angle
 
@@ -51,7 +51,6 @@ void init(){
         break;
     }
     mesh.init(perlin_fractal, mesh_height, mesh_width);
-//    mesh.setImage(perlin_fractal);
 }
 
 
