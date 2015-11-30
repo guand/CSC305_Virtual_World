@@ -53,9 +53,9 @@ void main() {
       vec3 snow_color = texture(snow_tex, uv).rgb;
       base_color = snow_color;
   }
-//  vec3 N = normalize(fnormal_cam);
-//  vec3 L = vec3(0,0,1);
-//  float lamb = dot( N, L );
-//  color = base_color * lamb;
-    color = base_color;
+  vec3 N = normalize(fnormal_cam);
+  vec3 L = vec3(0,0,1);
+  float lamb = dot( N, L );
+  color = base_color * lamb;
+//    color = base_color;
 }

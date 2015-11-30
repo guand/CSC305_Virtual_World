@@ -9,11 +9,6 @@ protected:
     GLuint _vao; ///< vertex array object
     GLuint _pid; ///< GLSL shader program ID
     GLuint _tex; ///< Texture ID
-    GLuint _grass;
-    GLuint _rock;
-    GLuint _sand;
-    GLuint _snow;
-    GLuint _water;
     GLuint _vpoint;    ///< memory buffer
     GLuint _vnormal;   ///< memory buffer
     GLuint _vtexcoord;
@@ -40,8 +35,8 @@ public:
         glBindVertexArray(_vao);
         check_error_gl();
 
-        float f_tex_u = float(mWidth)*0.02;
-        float f_tex_v = float(mHeight)*0.02;
+        float f_tex_u = float(mWidth)*(6/float(mWidth));
+        float f_tex_v = float(mHeight)*(6/float(mHeight));
         bufferMatrix _triangulation_matrix(mWidth, mHeight);
         ///--- Vertex Buffer
         for(int i = 0; i < mWidth; ++i)
@@ -58,6 +53,7 @@ public:
                 float z_height = iColor(0)*0.5;
                 if(iColor(0) < 0.0f) z_height = 0.0;
                 _triangulation.push_back(vec3(x_vertex_pt, y_vertex_pt, z_height));
+                _triangulation_matrix(i, j) = vec3(x_vertex_pt, y_vertex_pt, z_height);
                 _triangulation_tex.push_back(vec2(x_scale * f_tex_u, y_scale * f_tex_v));
             }
         }
@@ -75,26 +71,15 @@ public:
         {
             for(int j = 0; j < mHeight-1; ++j)
             {
-
-//                vec3 vTriangle0[] = {
-//                    _triangulation.at(nIncrementor),
-//                    _triangulation.at(nIncrementor+mWidth),
-//                    _triangulation.at(nIncrementor+mWidth+1)
-//                };
-//                vec3 vTriangle1[] = {
-//                    _triangulation.at(nIncrementor+mWidth+1),
-//                    _triangulation.at(nIncrementor+1),
-//                    _triangulation.at(nIncrementor)
-//                };
                 vec3 vTriangle0[] = {
-                    _triangulation.at(nIncrementor),
-                    _triangulation.at(nIncrementor+mWidth),
-                    _triangulation.at(nIncrementor+1)
+                    _triangulation_matrix(i, j),
+                    _triangulation_matrix(i+1, j),
+                    _triangulation_matrix(i+1, j+1)
                 };
                 vec3 vTriangle1[] = {
-                    _triangulation.at(nIncrementor+mWidth+1),
-                    _triangulation.at(nIncrementor+1),
-                    _triangulation.at(nIncrementor+mWidth)
+                    _triangulation_matrix(i+1, j+1),
+                    _triangulation_matrix(i, j+1),
+                    _triangulation_matrix(i, j)
                 };
 
                 vec3 vTriangleNormal0 = (vTriangle0[0] - vTriangle0[1]).cross(vTriangle0[1] - vTriangle0[2]);
@@ -107,9 +92,9 @@ public:
             }
         }
 
-        for(int i = 0; i < mWidth-1; ++i)
+        for(int i = 0; i < mWidth; ++i)
         {
-            for(int j = 0; j < mHeight-1; ++j)
+            for(int j = 0; j < mHeight; ++j)
             {
                 vec3 normal_vertex = vec3(0.0, 0.0, 0.0);
                 if(i != 0 && j != 0)
@@ -141,16 +126,17 @@ public:
         check_error_gl();
     
         ///--- Index Buffer
-        int incrementor = 0;
         for(int i = 0; i < mWidth-1; ++i)
         {
             for(int j = 0; j < mHeight; ++j)
             {
-                _triangulation_index.push_back(incrementor);
-                _triangulation_index.push_back(incrementor+mWidth);
-                incrementor++;
+                for(int k = 0; k < 2; ++k){
+                    int i_row = i + (1 - k);
+                    int i_index = i_row*mHeight+j;
+                    _triangulation_index.push_back(i_index);
+                }
             }
-            if(i < image.rows()-2) _triangulation_index.push_back(mWidth*mHeight);
+            if(i < mWidth-2)_triangulation_index.push_back(mWidth*mHeight);
         }
 
 
@@ -203,7 +189,6 @@ public:
     
 private:
     void loadTexture(GLuint *id, const char *location, const char* name, int texture_id) {
-        std::cout << location << std::endl;
          glGenTextures(1, id);
          glBindTexture(GL_TEXTURE_2D, *id);
          glfwLoadTexture2D(location, 0);
