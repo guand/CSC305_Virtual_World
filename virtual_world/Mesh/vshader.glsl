@@ -12,16 +12,17 @@ uniform mat4 MODEL;
 uniform mat4 VIEW;
 uniform mat4 PROJ;
 
-mat4 S(float s){
-    return mat4(mat3(s));
-}
+uniform sampler2D tex;
+float tex_at(vec2 uv){ return texture(tex,uv).r; }
 
 void main() {
     /// UNCOMMENT ONE OF THESE
 //    vheight = 0;
 //    vheight = scale * sin(10*vpoint.x + time);
     fnormal_cam = inverse( transpose( mat3(VIEW * MODEL) )) * vnormal;
-    vheight = vpoint.z;
-    gl_Position = PROJ * VIEW * MODEL * vec4(vpoint, 1.0);
-    uv = vtexcoord;
+    vheight = scale * tex_at( .5*vec2(vpoint.x, vpoint.y)+.5 );
+    if(vheight < 0.0) vheight = 0.0;
+//    vheight = vpoint.z;
+    gl_Position = PROJ * VIEW * MODEL * vec4(vpoint.xy, vheight, 1.0);
+    uv = vpoint.xy;
 }

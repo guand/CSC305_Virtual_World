@@ -164,23 +164,42 @@ public:
             glVertexAttribPointer(vtexcoord_id, 2, GL_FLOAT, DONT_NORMALIZE, ZERO_STRIDE, ZERO_BUFFER_OFFSET);
         }
         ///--- Load texture
-        for(int i = 0; i < m_num_tex; ++i)
+        loadTextureRGB32F(image.data(), image.rows(), image.cols());
+        for(int i = 1; i < m_num_tex; ++i)
         {
-            loadTexture(&m_texture[i], m_tex_paths[i], m_tex_names[i], i);
+            loadTexture(&m_texture[i-1], m_tex_paths[i-1], m_tex_names[i-1], i);
         }
+
+    }
+
+
+    void loadTextureRGB32F(void * pTex, int width, int height)
+    {
+        glBindTexture(GL_TEXTURE_2D, _tex);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width,
+                        height, 0, GL_RGB, GL_FLOAT,
+                        pTex);
     }
 
     void cleanup(){
         /// TODO
     }
 
+
+
     void draw(){
         bindShader();
             ///--- Setup the texture units
-            for(int i = 0; i < m_num_tex; ++i)
+            textureDraw(_tex, 0);
+            for(int i = 1; i < m_num_tex; ++i)
             {
-                textureDraw(m_texture[i], i);
+                textureDraw(m_texture[i-1], i);
             }
+
             glUniform1f(glGetUniformLocation(_pid, "time"), glfwGetTime());
             glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
             glDrawElements(GL_TRIANGLE_STRIP, /*#vertices*/ _triangulation_index.size(), GL_UNSIGNED_INT, ZERO_BUFFER_OFFSET);

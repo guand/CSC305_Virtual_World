@@ -9,11 +9,11 @@ int noise_width = 512;
 int noise_height = 512;
 int mesh_width = 128;
 int mesh_height = 128;
-float octave = 3.0;
+float octave = 5.0;
 int period = 256;
 int seed = 134;
 float lacunarity = 2.0;
-float gain = 0.25;
+float gain = 0.5;
 float offset = 0.35;
 typedef Eigen::Matrix<Eigen::Vector3f, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> RGBImage;
 enum turbulance {
