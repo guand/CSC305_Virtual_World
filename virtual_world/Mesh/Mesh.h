@@ -23,6 +23,12 @@ protected:
     std::vector<int> _triangulation_index;
     typedef Eigen::Matrix<Eigen::Vector3f, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> bufferMatrix;
 
+private:
+    GLuint m_texture[5];
+    const char *m_tex_paths[5] = {"Mesh/grass.tga", "Mesh/rock.tga", "Mesh/sand.tga", "Mesh/snow.tga", "Mesh/water.tga"};
+    const char *m_tex_names[5] = {"grass_tex", "rock_tex", "sand_tex", "snow_tex", "water_tex"};
+    int m_num_tex = 5;
+
 public:        
     GLuint getProgramID(){ 
         return _pid; 
@@ -34,8 +40,8 @@ public:
         glBindVertexArray(_vao);
         check_error_gl();
 
-        float f_tex_u = float(mWidth) * .2f;
-        float f_tex_v = float(mHeight) * .2f;
+        float f_tex_u = float(mWidth)*0.02;
+        float f_tex_v = float(mHeight)*0.02;
         bufferMatrix _triangulation_matrix(mWidth, mHeight);
         ///--- Vertex Buffer
         for(int i = 0; i < mWidth; ++i)
@@ -69,6 +75,17 @@ public:
         {
             for(int j = 0; j < mHeight-1; ++j)
             {
+
+//                vec3 vTriangle0[] = {
+//                    _triangulation.at(nIncrementor),
+//                    _triangulation.at(nIncrementor+mWidth),
+//                    _triangulation.at(nIncrementor+mWidth+1)
+//                };
+//                vec3 vTriangle1[] = {
+//                    _triangulation.at(nIncrementor+mWidth+1),
+//                    _triangulation.at(nIncrementor+1),
+//                    _triangulation.at(nIncrementor)
+//                };
                 vec3 vTriangle0[] = {
                     _triangulation.at(nIncrementor),
                     _triangulation.at(nIncrementor+mWidth),
@@ -161,56 +178,23 @@ public:
             glVertexAttribPointer(vtexcoord_id, 2, GL_FLOAT, DONT_NORMALIZE, ZERO_STRIDE, ZERO_BUFFER_OFFSET);
         }
         ///--- Load texture
-        glGenTextures(1, &_grass);
-        glBindTexture(GL_TEXTURE_2D, _grass);
-        glfwLoadTexture2D("Mesh/grass.tga", 0);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glUniform1i(glGetUniformLocation(_pid, "grass_tex"), 0 /*GL_TEXTURE0*/);
-        glGenTextures(1, &_rock);
-        glBindTexture(GL_TEXTURE_2D, _rock);
-        glfwLoadTexture2D("Mesh/rock.tga", 1);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glUniform1i(glGetUniformLocation(_pid, "rock_tex"), 1 /*GL_TEXTURE1*/);
-        glGenTextures(1, &_sand);
-        glBindTexture(GL_TEXTURE_2D, _sand);
-        glfwLoadTexture2D("Mesh/sand.tga", 2);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glUniform1i(glGetUniformLocation(_pid, "sand_tex"), 2 /*GL_TEXTURE2*/);
-        glGenTextures(1, &_snow);
-        glBindTexture(GL_TEXTURE_2D, _snow);
-        glfwLoadTexture2D("Mesh/snow.tga", 3);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glUniform1i(glGetUniformLocation(_pid, "snow_tex"), 3 /*GL_TEXTURE3*/);
-        glGenTextures(1, &_water);
-        glBindTexture(GL_TEXTURE_2D, _water);
-        glfwLoadTexture2D("Mesh/water.tga", 4);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glUniform1i(glGetUniformLocation(_pid, "water_tex"), 4 /*GL_TEXTURE4*/);
+        for(int i = 0; i < m_num_tex; ++i)
+        {
+            loadTexture(&m_texture[i], m_tex_paths[i], m_tex_names[i], i);
+        }
     }
 
     void cleanup(){
         /// TODO
     }
 
-    void textureDraw(GLuint id, int index)
-    {
-        glActiveTexture(GL_TEXTURE0+index);
-        glBindTexture(GL_TEXTURE_2D, id);
-    }
-
     void draw(){
-        bindShader();  
+        bindShader();
             ///--- Setup the texture units
-            textureDraw(_grass, 0);
-            textureDraw(_rock, 1);
-            textureDraw(_sand, 2);
-            textureDraw(_snow, 3);
-            textureDraw(_water, 4);
+            for(int i = 0; i < m_num_tex; ++i)
+            {
+                textureDraw(m_texture[i], i);
+            }
             glUniform1f(glGetUniformLocation(_pid, "time"), glfwGetTime());
             glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
             glDrawElements(GL_TRIANGLE_STRIP, /*#vertices*/ _triangulation_index.size(), GL_UNSIGNED_INT, ZERO_BUFFER_OFFSET);
@@ -218,6 +202,21 @@ public:
     }
     
 private:
+    void loadTexture(GLuint *id, const char *location, const char* name, int texture_id) {
+        std::cout << location << std::endl;
+         glGenTextures(1, id);
+         glBindTexture(GL_TEXTURE_2D, *id);
+         glfwLoadTexture2D(location, 0);
+         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+         glUniform1i(glGetUniformLocation(_pid, name), texture_id /*GL_TEXTURE0*/);
+    }
+
+    void textureDraw(GLuint id, int index) {
+        glActiveTexture(GL_TEXTURE0+index);
+        glBindTexture(GL_TEXTURE_2D, id);
+    }
+
     void bindShader() {
         glUseProgram(_pid);
         glBindVertexArray(_vao);

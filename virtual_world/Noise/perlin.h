@@ -29,11 +29,11 @@ protected:
     {
         float frequency = 1.0f / period;
         int left = (i / period) * period;
-        int right = (left + period) % this->width;
+        int right = (left + period) % m_width;
         float dx = (i - left) * frequency;
 
         int top = (j / period) * period;
-        int bottom = (top + period) % this->height;
+        int bottom = (top + period) % m_height;
         float dy = (j - top) * frequency;
 
         vec2 a(dx, -dy);
@@ -41,21 +41,21 @@ protected:
         vec2 c(dx - 1, 1 - dy);
         vec2 d(dx, 1 - dy);
 
-        vec3 topleft = this->base(left, top);
+        vec3 topleft = m_base(left, top);
         float s = topleft(0) * a(0) + topleft(1) * a(1);
-        vec3 topright = this->base(right, top);
+        vec3 topright = m_base(right, top);
         float t = topright(0) * b(0) + topright(1) * b(1);
-        vec3 bottomleft = this->base(left, bottom);
+        vec3 bottomleft = m_base(left, bottom);
         float u = bottomleft(0) * d(0) + bottomleft(1) * d(1);
-        vec3 bottomright = this->base(right, bottom);
+        vec3 bottomright = m_base(right, bottom);
         float v = bottomright(0) * c(0) + bottomright(1) * c(1);
 
-        float fx = this->f(dx);
-        float fy = this->f(dy);
+        float fx = f(dx);
+        float fy = f(dy);
 
-        float st = this->mix(s, t, fx);
-        float uv = this->mix(u, v, fx);
-        float noise = this->mix(st, uv, fy);
+        float st = mix(s, t, fx);
+        float uv = mix(u, v, fx);
+        float noise = mix(st, uv, fy);
         return noise;
     }
 
@@ -63,11 +63,11 @@ protected:
     {
         float frequency = 1.0f / period;
         int left = (i / period) * period;
-        int right = (left + period) % this->width;
+        int right = (left + period) % m_width;
         float dx = (i - left) * frequency;
 
         int top = (j / period) * period;
-        int bottom = (top + period) % this->height;
+        int bottom = (top + period) % m_height;
         float dy = (j - top) * frequency;
 
         vec2 a(dx, -dy);
@@ -75,21 +75,21 @@ protected:
         vec2 c(dx - 1, 1 - dy);
         vec2 d(dx, 1 - dy);
 
-        vec3 topleft = this->base(left, top);
+        vec3 topleft = m_base(left, top);
         float s = topleft(0) * a(0) + topleft(1) * a(1);
-        vec3 topright = this->base(right, top);
+        vec3 topright = m_base(right, top);
         float t = topright(0) * b(0) + topright(1) * b(1);
-        vec3 bottomleft = this->base(left, bottom);
+        vec3 bottomleft = m_base(left, bottom);
         float u = bottomleft(0) * d(0) + bottomleft(1) * d(1);
-        vec3 bottomright = this->base(right, bottom);
+        vec3 bottomright = m_base(right, bottom);
         float v = bottomright(0) * c(0) + bottomright(1) * c(1);
 
-        float fx = this->f(dx);
-        float fy = this->f(dy);
+        float fx = f(dx);
+        float fy = f(dy);
 
-        float st = this->mix(s, t, fx);
-        float uv = this->mix(u, v, fx);
-        float noise = this->mix(st, uv, fy);
+        float st = mix(s, t, fx);
+        float uv = mix(u, v, fx);
+        float noise = mix(st, uv, fy);
 
 //        float f2x = this->f2(dx) * ( (t-s) + (s-t-v+u)* fy);
 //        float f2y = this->f2(dy) * ( (v-s) + (s-t-v+u)* fx);

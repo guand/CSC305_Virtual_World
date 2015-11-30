@@ -18,21 +18,21 @@ private:
         float sum = 0.5;
         float p = _period;
         vec2 dsum = vec2(0, 0);
-        for(int k = 0; k < int(this->octave); ++k)
+        for(int k = 0; k < int(m_octave); ++k)
         {
-            vec3 noise = this->pseudoPerlinNoise(i, j, p);
+            vec3 noise = pseudoPerlinNoise(i, j, p);
             dsum(0) += noise(1);
             dsum(1) += noise(2);
-            sum += this->exponent_array.at(k) * noise(0) / (1 + dsum.dot(dsum));
-            p *= 1 / this->lacunarity;
+            sum += m_exponent_array.at(k) * noise(0) / (1 + dsum.dot(dsum));
+            p *= 1 / m_lacunarity;
         }
-        float remainder = this->octave - int(this->octave);
+        float remainder = m_octave - int(m_octave);
         if(remainder)
         {
-            vec3 noise = this->pseudoPerlinNoise(i, j, p);
+            vec3 noise = pseudoPerlinNoise(i, j, p);
             dsum(0) += noise(1);
             dsum(1) += noise(2);
-            sum += remainder * noise(0) * this->exponent_array.at(int(this->octave) + 1) / (1 + dsum.dot(dsum));
+            sum += remainder * noise(0) * m_exponent_array.at(int(m_octave) + 1) / (1 + dsum.dot(dsum));
         }
         return sum;
     }
@@ -48,22 +48,22 @@ private:
     {
         float sum = 0;
         float p = _period;
-        for(int k = 0; k < int(this->octave); ++k)
+        for(int k = 0; k < int(m_octave); ++k)
         {
-            float noise = this->perlinNoise(i, j, p);
-            sum += noise*this->exponent_array.at(k);
-            p *= 1 / this->lacunarity;
+            float noise = perlinNoise(i, j, p);
+            sum += noise*m_exponent_array.at(k);
+            p *= 1 / m_lacunarity;
         }
 
-        float remainder = this->octave - int(this->octave);
+        float remainder = m_octave - int(m_octave);
         if(remainder)
-            sum += remainder * this->perlinNoise(i, j, p) * this->exponent_array.at(int(this->octave) + 1);
+            sum += remainder * perlinNoise(i, j, p) * m_exponent_array.at(int(m_octave));
         return sum;
     }
 
     float rigidNoise(int i, int j, int _period)
     {
-        return .3f - abs(this->perlinNoise(i, j, _period));
+        return .3f - abs(perlinNoise(i, j, _period));
     }
 
     /**
@@ -77,66 +77,68 @@ private:
     {
         float sum = 0;
         float p = _period;
-        for(int k = 0; k < int(this->octave); ++k)
+        for(int k = 0; k < int(m_octave); ++k)
         {
-            float noise = this->rigidNoise(i, j, p);
-            sum += noise*this->exponent_array.at(k);
-            p *= 1 / this->lacunarity;
+            float noise = rigidNoise(i, j, p);
+            sum += noise*m_exponent_array.at(k);
+            p *= 1 / m_lacunarity;
         }
 
-        float remainder = this->octave - int(this->octave);
+        float remainder = m_octave - int(m_octave);
         if(remainder)
-            sum += remainder * this->perlinNoise(i, j, p) * this->exponent_array.at(int(this->octave) + 1);
+            sum += remainder * perlinNoise(i, j, p) * m_exponent_array.at(int(m_octave));
         return sum;
     }
 
     float hybridNoise(int i, int j, int _period)
     {
-        return this->perlinNoise(i, j, _period) + this->offset;
+        return perlinNoise(i, j, _period) + m_offset;
     }
 
     float hybridTurbulence(int i, int j, int _period)
     {
         float sum = 0;
         float p = _period;
-        float result = this->hybridNoise(i, j, p) * this->exponent_array.at(0);
+        float result = hybridNoise(i, j, p) * m_exponent_array.at(0);
+        p *= 1 / m_lacunarity;
         float weight = result;
-        for(int k = 1; k < int(this->octave); ++k)
+        for(int k = 1; k < int(m_octave); ++k)
         {
             if( weight > 1.0 ) weight = 1.0;
 
-            float noise = this->hybridNoise(i, j, p);
-            sum += noise*this->exponent_array.at(k)*weight;
-            p *= 1 / this->lacunarity;
-            weight *= sum;
+            float noise = hybridNoise(i, j, p);
+            float signal = noise*m_exponent_array.at(k);
+            sum += weight*signal;
+            p *= 1 / m_lacunarity;
+            weight *= signal;
         }
 
-        float remainder = this->octave - int(this->octave);
+        float remainder = m_octave - int(m_octave);
         if(remainder)
-            sum += remainder * this->perlinNoise(i, j, p) * this->exponent_array.at(int(this->octave) + 1);
+            sum += remainder * perlinNoise(i, j, p) * m_exponent_array.at(int(m_octave));
         return sum;
     }
 
 public:
     Fractal(float octave, int period, int seed, int width, int height, float lacunarity, float gain, float offset)
     {
-        this->octave = octave;
-        this->period = period;
-        this->seed = seed;
-        this->width = width;
-        this->height = height;
-        this->lacunarity = lacunarity;
-        this->gain = gain;
-        this->offset = offset;
+        m_octave = octave;
+        m_period = period;
+        m_seed = seed;
+        m_width = width;
+        m_height = height;
+        m_lacunarity = lacunarity;
+        m_gain = gain;
+        m_offset = offset;
     }
 
     RGBImage setNormalNoise()
     {
-        RGBImage PerlinNoise(this->width, this->height);
-        for (int i = 0; i < this->width; ++i)
-            for (int j = 0; j < this->height; ++j)
+        RGBImage PerlinNoise(m_width, m_height);
+        for (int i = 0; i < m_width; ++i)
+            for (int j = 0; j < m_height; ++j)
             {
-                float noise = this->turbulence(i, j, this->period);
+                float noise = turbulence(i, j, m_period);
                 PerlinNoise(i, j) = vec3(noise, noise, noise);
             }
         return PerlinNoise;
@@ -144,11 +146,11 @@ public:
 
     RGBImage setRigidNoise()
     {
-        RGBImage PerlinNoise(this->width, this->height);
-        for (int i = 0; i < this->width; ++i)
-            for (int j = 0; j < this->height; ++j)
+        RGBImage PerlinNoise(m_width, m_height);
+        for (int i = 0; i < m_width; ++i)
+            for (int j = 0; j < m_height; ++j)
             {
-                float noise = this->rigidTurbulence(i, j, this->period);
+                float noise = rigidTurbulence(i, j, m_period);
                 PerlinNoise(i, j) = vec3(noise, noise, noise);
             }
         return PerlinNoise;
@@ -156,11 +158,11 @@ public:
 
     RGBImage setIQNoise()
     {
-        RGBImage PerlinNoise(this->width, this->height);
-        for (int i = 0; i < this->width; ++i)
-            for (int j = 0; j < this->height; ++j)
+        RGBImage PerlinNoise(m_width, m_height);
+        for (int i = 0; i < m_width; ++i)
+            for (int j = 0; j < m_height; ++j)
             {
-                float noise = this->iqTurbulence(i, j, this->period);
+                float noise = iqTurbulence(i, j, m_period);
                 PerlinNoise(i, j) = vec3(noise, noise, noise);
             }
         return PerlinNoise;
@@ -168,11 +170,11 @@ public:
 
     RGBImage setHybridNoise()
     {
-        RGBImage PerlinNoise(this->width, this->height);
-        for (int i = 0; i < this->width; ++i)
-            for (int j = 0; j < this->height; ++j)
+        RGBImage PerlinNoise(m_width, m_height);
+        for (int i = 0; i < m_width; ++i)
+            for (int j = 0; j < m_height; ++j)
             {
-                float noise = this->hybridTurbulence(i, j, this->period);
+                float noise = hybridTurbulence(i, j, m_period);
                 PerlinNoise(i, j) = vec3(noise, noise, noise);
             }
         return PerlinNoise;

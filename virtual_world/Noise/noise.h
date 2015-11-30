@@ -7,16 +7,16 @@
 class Noise {
 protected:
     typedef Eigen::Matrix<Eigen::Vector3f, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> RGBImage;
-    float octave;
-    int period;
-    int seed;
-    int width;
-    int height;
-    float lacunarity;
-    float gain;
-    float offset;
-    std::vector<float> exponent_array;
-    RGBImage base;
+    float m_octave;
+    int m_period;
+    int m_seed;
+    int m_width;
+    int m_height;
+    float m_lacunarity;
+    float m_gain;
+    float m_offset;
+    std::vector<float> m_exponent_array;
+    RGBImage m_base;
 
 private:
     //return a random floating point number between [0, 1]
@@ -28,26 +28,26 @@ private:
 public:
     void init() {
         float _frequency = 1.0f;
-        for(int i = 0; i < (this->octave + 1); ++i)
+        for(int i = 0; i < (m_octave + 1); ++i)
         {
-            this->exponent_array.push_back(pow(_frequency, -1*(this->gain)));
-            _frequency *= this->lacunarity;
+            m_exponent_array.push_back(pow(_frequency, -1*(m_gain)));
+            _frequency *= m_lacunarity;
         }
 
-        std::srand(this->seed);
-        RGBImage _base(this->width, this->height);
-        for(int i = 0; i < this->width; ++i)
+        std::srand(m_seed);
+        RGBImage _base(m_width, m_height);
+        for(int i = 0; i < m_width; ++i)
         {
-            for(int j = 0; j < this->height; ++j)
+            for(int j = 0; j < m_height; ++j)
             {
                 vec3 randGradientVec;
-                randGradientVec(0) = cos(2 * M_PI * this->rand0_1());
-                randGradientVec(1) = sin(2 * M_PI * this->rand0_1());
+                randGradientVec(0) = cos(2 * M_PI * rand0_1());
+                randGradientVec(1) = sin(2 * M_PI * rand0_1());
                 randGradientVec(2) = 0;
                 _base(i, j) = randGradientVec;
             }
         }
-        this->base = _base;
+        m_base = _base;
     }
 };
 

@@ -12,6 +12,10 @@ uniform mat4 MODEL;
 uniform mat4 VIEW;
 uniform mat4 PROJ;
 
+mat4 S(float s){
+    return mat4(mat3(s));
+}
+
 void main() {
     /// UNCOMMENT ONE OF THESE
 //    vheight = 0;
