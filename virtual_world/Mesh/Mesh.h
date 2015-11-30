@@ -22,7 +22,7 @@ private:
     GLuint m_texture[5];
     const char *m_tex_paths[5] = {"Mesh/grass.tga", "Mesh/rock.tga", "Mesh/sand.tga", "Mesh/snow.tga", "Mesh/water.tga"};
     const char *m_tex_names[5] = {"grass_tex", "rock_tex", "sand_tex", "snow_tex", "water_tex"};
-    int m_num_tex = 5;
+    int m_num_tex = 6;
 
 public:        
     GLuint getProgramID(){ 
@@ -52,8 +52,8 @@ public:
                 vec3 iColor = image(i * img_scale_width, j * img_scale_height);
                 float z_height = iColor(0)*0.5;
                 if(iColor(0) < 0.0f) z_height = 0.0;
-                _triangulation.push_back(vec3(x_vertex_pt, y_vertex_pt, z_height));
-                _triangulation_matrix(i, j) = vec3(x_vertex_pt, y_vertex_pt, z_height);
+                _triangulation.push_back(vec3(x_vertex_pt, y_vertex_pt, 0));
+                _triangulation_matrix(i, j) = vec3(x_vertex_pt, y_vertex_pt, 0);
                 _triangulation_tex.push_back(vec2(x_scale * f_tex_u, y_scale * f_tex_v));
             }
         }
