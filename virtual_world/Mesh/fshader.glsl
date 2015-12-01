@@ -90,21 +90,27 @@ void main() {
       } else {
         color = rock_color*lamb_rock;
       }
+      color *= lamb;
   } else if (vheight <= .45 && vheight > .35) {
-      color = rock_color*lamb_rock;
+      if(angle <= 40){
+        color = mix(rock_color*lamb_rock, grass_color, pow(0.5, ((angle - 0.0) / (40.0 - 0.0))));
+      } else {
+        color = rock_color*lamb_rock;
+      }
+      color *= lamb;
   } else if (vheight <= 35 && vheight > .06) {
       if(angle <= 40) {
         color = mix(grass_color, rock_color*lamb_rock, (angle - 0.0) / (40.0 - 0.0));
       } else {
         color = rock_color*lamb_rock;
       }
+      color *= lamb;
   } else if (vheight <= .06 && vheight > .02) {
-
       color = mix(sand_color, grass_color, (vheight - 0.03)/(0.06 - 0.03));
+      color *= lamb;
   } else {
 
-
-      color = mix(water_color*lamb_water, sand_color, (vheight - 0.0)/(0.02 - 0.0));
+      color = mix(water_color*lamb_water, sand_color*lamb, (vheight - 0.0)/(0.02 - 0.0));
   }
-  color *= lamb;
+
 }
