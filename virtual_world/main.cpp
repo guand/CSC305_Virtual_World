@@ -9,12 +9,12 @@ int noise_width = 512;
 int noise_height = 512;
 int mesh_width = 128;
 int mesh_height = 128;
-float octave = 4.0;
+float octave = 5.0;
 int period = 256;
-int seed = 134;
+int seed = 434;
 float lacunarity = 2.0;
-float gain = 0.5;
-float offset = 0.35;
+float gain = 0.25;
+float offset = 0.5;
 typedef Eigen::Matrix<Eigen::Vector3f, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> RGBImage;
 enum turbulance {
     NORMAL_T,
@@ -22,7 +22,7 @@ enum turbulance {
     IQ_T,
     HYBRID_T
 };
-turbulance fractal_type = NORMAL_T;
+turbulance fractal_type = HYBRID_T;
 Mesh mesh;
 float theta = 30; //< camera angle
 
@@ -46,6 +46,7 @@ void init(){
         break;
     case HYBRID_T:
         perlin_fractal = fractal.setHybridNoise();
+        break;
     default:
         std::cout << "Something Broke!!!" << std::endl;
         break;
@@ -56,7 +57,7 @@ void init(){
 
 
 void display(){
-    opengp::update_title_fps("Intro. to Computer Graphics");   
+    opengp::update_title_fps("Procedural terrain Generation");
     glViewport(0,0,window_width,window_height);    
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     

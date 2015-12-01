@@ -50,10 +50,10 @@ public:
                 float img_scale_width = image.rows()/float(mWidth);
                 float img_scale_height = image.cols()/float(mHeight);
                 vec3 iColor = image(i * img_scale_width, j * img_scale_height);
-                float z_height = iColor(0)*0.5;
+                float z_height = iColor(0)*.5;
                 if(iColor(0) < 0.0f) z_height = 0.0;
-                _triangulation.push_back(vec3(x_vertex_pt, y_vertex_pt, 0));
-                _triangulation_matrix(i, j) = vec3(x_vertex_pt, y_vertex_pt, 0);
+                _triangulation.push_back(vec3(x_vertex_pt, y_vertex_pt, z_height));
+                _triangulation_matrix(i, j) = vec3(x_vertex_pt, y_vertex_pt, z_height);
                 _triangulation_tex.push_back(vec2(x_scale * f_tex_u, y_scale * f_tex_v));
             }
         }
