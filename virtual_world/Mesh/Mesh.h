@@ -35,8 +35,8 @@ public:
         glBindVertexArray(_vao);
         check_error_gl();
 
-        float f_tex_u = float(mWidth)*(6/float(mWidth));
-        float f_tex_v = float(mHeight)*(6/float(mHeight));
+        float f_tex_u = float(mWidth)*(8/float(mWidth));
+        float f_tex_v = float(mHeight)*(8/float(mHeight));
         bufferMatrix _triangulation_matrix(mWidth, mHeight);
         ///--- Vertex Buffer
         for(int i = 0; i < mWidth; ++i)

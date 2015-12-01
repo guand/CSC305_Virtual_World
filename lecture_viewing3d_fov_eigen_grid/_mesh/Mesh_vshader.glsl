@@ -1,6 +1,8 @@
 #version 330 core 
 uniform float time;
 in vec3 vpoint; ///< [-1,+1]
+in vec3 vnormal;
+out vec3 fnormal_cam;
 out float vheight; ///< for debug coloring
 out float scale=.5;
 

@@ -11,7 +11,8 @@ in vec3 fcolor; ///< passed by vshader
 void main() {
 //    color = texture(tex,uv).rgb;
 //     color = COLORS[gl_PrimitiveID];
-    color = fcolor; /// fcolor is interpolated!
+    color = texture(tex,uv).rgb;
+//    color = fcolor; /// fcolor is interpolated!
 }
 
 
