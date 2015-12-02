@@ -30,7 +30,7 @@ void main() {
 //    }
     gl_Position = PROJ * VIEW * MODEL * vec4(vpoint.xy, vheight, 1.0);
     uv = vpoint.yx;
-    tex_uv = vtexcoord;
+    tex_uv = vtexcoord.yx;
     fpoint = vec3(vpoint.xy, vheight);
 
 }

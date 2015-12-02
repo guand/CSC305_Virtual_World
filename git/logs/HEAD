@@ -1,0 +1,20 @@
+0000000000000000000000000000000000000000 3904e72cf4e3ac20ad24545fbd649ca281c18d14 guand <guan3d@gmail.com> 1446585045 -0800	clone: from https://github.com/luckysama/icg.git
+3904e72cf4e3ac20ad24545fbd649ca281c18d14 bbc6e1aa982d0debfd5abc180ba804075da9c7df guand <guan3d@gmail.com> 1447829410 -0800	commit: Added changes, first push to repo
+bbc6e1aa982d0debfd5abc180ba804075da9c7df 78c95cac2007e17da19b47ff46561d1ddcf89c05 guand <guan3d@gmail.com> 1447843038 -0800	commit: Added virtual_world folder and added code into it
+78c95cac2007e17da19b47ff46561d1ddcf89c05 fae4460bc5a210bab97c3f07cebeea98f9caff28 guand <guan3d@gmail.com> 1448006946 -0800	commit: Added a better version of the mesh
+fae4460bc5a210bab97c3f07cebeea98f9caff28 dc892d809662ebcb994f4db36e6f1f05edf1751c guand <guan3d@gmail.com> 1448066594 -0800	commit: Added Perlin noise and added brownian motion
+dc892d809662ebcb994f4db36e6f1f05edf1751c 9b522d4a66fffb1137bf63e51030537b85e89b70 guand <guan3d@gmail.com> 1448156232 -0800	commit: Added color to the texture map based on the height of the texture
+9b522d4a66fffb1137bf63e51030537b85e89b70 a4754c8180e8173fc0d7b0f39200233c9e3653b6 guand <guan3d@gmail.com> 1448455276 -0800	commit: Added Rigged Noise, iqNoise and cleaned up the perlin function
+a4754c8180e8173fc0d7b0f39200233c9e3653b6 86bf9f50ab9f674f74c679a0a8ea54bf5bb1856b guand <guan3d@gmail.com> 1448586353 -0800	commit: Cleaned up code added remainder for fBM
+86bf9f50ab9f674f74c679a0a8ea54bf5bb1856b 6e61f641159a1bb3b08b0320088b01cec89bb3d8 guand <guan3d@gmail.com> 1448586662 -0800	commit: reorganized files and added noise folder as well as moved all the noise files to that folder
+6e61f641159a1bb3b08b0320088b01cec89bb3d8 49a1c113041c82bea73adda7fe34ddf30eee89ae guand <guan3d@gmail.com> 1448681432 -0800	commit: Added Normals and calculated the labertian shader
+49a1c113041c82bea73adda7fe34ddf30eee89ae 86f6e0f3703e4fa4527e5bc2fbfe851e710a7c20 guand <guan3d@gmail.com> 1448683795 -0800	commit: Fixed issue with normals
+86f6e0f3703e4fa4527e5bc2fbfe851e710a7c20 3a569f42b882e85b403354553784dd069ec5c089 guand <guan3d@gmail.com> 1448717357 -0800	commit: Added tile textures into the scene
+3a569f42b882e85b403354553784dd069ec5c089 0236af0f4eb28f5df90b4ec1d976a5b3f5437566 guand <guan3d@gmail.com> 1448842587 -0800	commit: Cleeaned up texture code
+0236af0f4eb28f5df90b4ec1d976a5b3f5437566 412d2c2cd8b7ced6076a4d407c3a8c0eb006cad8 guand <guan3d@gmail.com> 1448856918 -0800	commit: Fixed normals for diffusion
+412d2c2cd8b7ced6076a4d407c3a8c0eb006cad8 fd64430d5c01ec37971e623a4ff95f66a10a016d guand <guan3d@gmail.com> 1448878612 -0800	commit: Added shading in the fragment shader
+fd64430d5c01ec37971e623a4ff95f66a10a016d 4fb7f7cd71f402e10fcabbe9de232f426bae2493 guand <guan3d@gmail.com> 1448889588 -0800	commit: Added the grabbing of the normals in the fragment shader
+4fb7f7cd71f402e10fcabbe9de232f426bae2493 d4b5972442690c3e22ee315b06b2c633f78f3fe9 guand <guan3d@gmail.com> 1448956758 -0800	commit: Fixed textures and added bump mapping
+d4b5972442690c3e22ee315b06b2c633f78f3fe9 edd276bc902b225de66a39c44ff7c7f9fd4b1279 guand <guan3d@gmail.com> 1448963897 -0800	commit: Added bump mapping
+edd276bc902b225de66a39c44ff7c7f9fd4b1279 2deedf55a00422331bcfbd89f2a7305abae2e2a4 guand <guan3d@gmail.com> 1448964774 -0800	commit: Fixed minor texturing issue
+2deedf55a00422331bcfbd89f2a7305abae2e2a4 ff0169d47f16f4243df727fea9a9bf1c093e93ba guand <guan3d@gmail.com> 1449023168 -0800	commit: Added mousemovement

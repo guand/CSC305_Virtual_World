@@ -2,6 +2,7 @@
 #include "Mesh/mesh.h"
 #include "Noise/perlin.h"
 #include "Noise/fractal.h"
+#include "Skybox/skybox.h"
 
 int window_width = 1024;
 int window_height = 768;
@@ -24,7 +25,7 @@ enum turbulance {
 };
 turbulance fractal_type = HYBRID_T;
 Mesh mesh;
-
+Skybox skybox;
 float camera_distance = 45.0;
 float horizontalAngle = 0;
 // vertical angle : 0, look at the horizon
@@ -73,6 +74,7 @@ void init(){
         break;
     }
     mesh.init(perlin_fractal, mesh_height, mesh_width);
+    skybox.init();
 }
 
 void movementCalculations(){
@@ -128,14 +130,25 @@ void display(){
         mat4 PROJ = Eigen::perspective(75.0f, window_width/(float)window_height, 0.1f, 100.0f);
         glUniformMatrix4fv(glGetUniformLocation(pid, "PROJ"), 1, GL_FALSE, PROJ.data());
     glUseProgram(pid);
-
     mesh.draw();
+    glDepthMask(GL_FALSE);
+    GLuint c_pid = skybox.getProgramID();
+    glUseProgram(c_pid);
+//        mat4 VIEW1 = Eigen::lookAt( camera_pos, vec3(0,0,0), vec3(0,0,1) ); //< "z" up on screen
+        glUniformMatrix4fv(glGetUniformLocation(c_pid, "MODEL"), 1, GL_FALSE, MODEL.data());
+        glUniformMatrix4fv(glGetUniformLocation(c_pid, "VIEW"), 1, GL_FALSE, VIEW.data());
+        glUniformMatrix4fv(glGetUniformLocation(c_pid, "PROJ"), 1, GL_FALSE, PROJ.data());
+    glUseProgram(c_pid);
+    skybox.draw();
+    glDepthMask(GL_TRUE);
 }
 
 /// NOTE: see glfwEnable(GLFW_KEY_REPEAT)
 void keyboard(int key, int action){
-    if (action==GLFW_PRESS && key==GLFW_KEY_SPACE)
+    if (action==GLFW_PRESS && key==GLFW_KEY_SPACE) {
         mesh.wireframe = !mesh.wireframe;
+        skybox.wireframe = !skybox.wireframe;
+    }
     if (action==GLFW_PRESS && key==87)
         camera_pos += direction * deltaTime * speed;
     if (action==GLFW_PRESS && key==83)
