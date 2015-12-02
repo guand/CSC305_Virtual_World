@@ -72,17 +72,17 @@ void main() {
   vec3 sand_color = texture(sand_tex, uv).rgb;
   vec3 water_color = texture(water_tex, tex_uv).rgb;
   vec3 tex_color = texture(_tex, texCoord).rgb;
-  vec3 base_color;
+  vec3 base_color = mix(Y, G, vheight/scale);
 
   // calculations
   vec3 N1 = normalize(vec3(dX, 1.0f / normalStrength, dY));
   vec3 N2 = normalize(fnormal_cam);
-  vec3 N = cross(N1, N2) * .5 + .5;
+  vec3 N = N1 * N2 * .5 + .5;
   float slope = dot(N1 , vec3(0, 1, 0));
   float PI = 3.1415926535897932384626433832795;
   float angle = acos(slope)*(180/PI);
 
-  float lamb = max(dot( N1, normalize(L) ), 0.0);
+  float lamb = max(dot( N, normalize(L) ), 0.0);
 
   if(vheight > .45) {
       if(angle <= 40){
@@ -106,6 +106,7 @@ void main() {
       }
       color *= lamb;
   } else if (vheight <= .06 && vheight > .02) {
+//      vec3 grass_rock_color = mix(grass_color, rock_color*lamb_rock, (vheight - 0.03) / (.06 - 0.03));
       color = mix(sand_color, grass_color, (vheight - 0.03)/(0.06 - 0.03));
       color *= lamb;
   } else {
