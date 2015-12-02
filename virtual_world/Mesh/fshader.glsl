@@ -107,13 +107,17 @@ void main() {
         color = rock_color*lamb_rock;
       }
       color *= lamb;
-  } else if (vheight <= .06 && vheight > .02) {
-//      vec3 grass_rock_color = mix(grass_color, rock_color*lamb_rock, (vheight - 0.03) / (.06 - 0.03));
-      color = mix(sand_color, grass_color, (vheight - 0.03)/(0.06 - 0.03));
+  } else if (vheight <= .06 && vheight > .04) {
+      vec3 grass_rock_color = mix(grass_color, rock_color*lamb_rock, (angle - 0.0) / (40.0 - 0.0));
+      color = mix(grass_color, grass_rock_color, (vheight - 0.05)/(0.06 - 0.05));
+      color *= lamb;
+  } else if(vheight <= .04 && vheight > .02) {
+      color = mix(sand_color, grass_color, (vheight - 0.03)/(0.04 - 0.03));
       color *= lamb;
   } else {
-
       color = mix(water_color, sand_color*lamb, (vheight - 0.0)/(0.02 - 0.0));
+      color *= lamb;
   }
+
 
 }

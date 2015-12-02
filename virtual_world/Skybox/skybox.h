@@ -18,6 +18,7 @@ protected:
     GLuint _skybox;
     GLuint _vpoint;    ///< memory buffer
     GLuint _vnormal;   ///< memory buffer
+    const char *_cube_tex[6] = {"Skybox/front.tga", "Skybox/back.tga", "Skybox/top.tga", "Skybox/bottom.tga", "Skybox/right.tga", "Skybox/left.tga"};
 
 public:
     GLuint getProgramID(){
@@ -87,17 +88,9 @@ public:
         glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), (GLvoid*)0);
 
         vector<const GLchar*> faces;
-        faces.push_back("Skybox/front.tga");
-        faces.push_back("Skybox/back.tga");
-
-
-        faces.push_back("Skybox/top.tga");
-        faces.push_back("Skybox/bottom.tga");
-
-        faces.push_back("Skybox/right.tga");
-        faces.push_back("Skybox/left.tga");
-
-
+        for(int i = 0; i < 6; ++i) {
+            faces.push_back(_cube_tex[i]);
+        }
 
         ///--- Compile the shaders
         c_pid = opengp::load_shaders("Skybox/vshader.glsl", "Skybox/fshader.glsl");
@@ -153,64 +146,6 @@ public:
     }
 
 private:
-//    void create_cube_map (const char* c_front, const char* c_back, const char* c_top, const char* c_bottom, const char* c_left, const char* c_right)
-//    {
-//            glActiveTexture(GL_TEXTURE0);
-//            glGenTextures(1, &_cube);
-//        // load each image and copy into a side of the cube-map texture
-//          assert (
-//            load_cube_map_side (_cube, GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, c_front));
-//          assert (
-//            load_cube_map_side (_cube, GL_TEXTURE_CUBE_MAP_POSITIVE_Z, c_back));
-//          assert (
-//            load_cube_map_side (_cube, GL_TEXTURE_CUBE_MAP_POSITIVE_Y, c_top));
-//          assert (
-//            load_cube_map_side (_cube, GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, c_bottom));
-//          assert (
-//            load_cube_map_side (_cube, GL_TEXTURE_CUBE_MAP_NEGATIVE_X, c_left));
-//          assert (
-//            load_cube_map_side (_cube, GL_TEXTURE_CUBE_MAP_POSITIVE_X, c_right));
-//          // format cube map texture
-//          glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//          glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-//          glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-//          glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-//          glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-//    }
-
-//    bool load_cube_map_side (GLuint texture, GLenum side_target, const char* file_name) {
-//      glBindTexture (GL_TEXTURE_CUBE_MAP, texture);
-
-//      int x, y, n;
-//      int force_channels = 4;
-//      unsigned char*  image_data = stbi_load (
-//        file_name, &x, &y, &n, force_channels);
-//      if (!image_data) {
-//        fprintf (stderr, "ERROR: could not load %s\n", file_name);
-//        return false;
-//      }
-//      // non-power-of-2 dimensions check
-//      if ((x & (x - 1)) != 0 || (y & (y - 1)) != 0) {
-//        fprintf (
-//          stderr, "WARNING: image %s is not power-of-2 dimensions\n", file_name
-//        );
-//      }
-
-//      // copy image data into 'target' side of cube map
-//      glTexImage2D (
-//        side_target,
-//        0,
-//        GL_RGBA,
-//        x,
-//        y,
-//        0,
-//        GL_RGBA,
-//        GL_UNSIGNED_BYTE,
-//        image_data
-//      );
-//      free (image_data);
-//      return true;
-//    }
 
     void bindShader() {
         glUseProgram(c_pid);
