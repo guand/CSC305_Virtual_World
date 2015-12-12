@@ -4,6 +4,7 @@
 #include "Noise/perlinfractal.h"
 #include "Noise/simplexfractal.h"
 #include "Skybox/skybox.h"
+#include "Camera/camera.h"
 
 int window_width = 1024;
 int window_height = 768;
@@ -23,10 +24,12 @@ enum turbulance {
     RIGID_T,
     IQ_T,
     HYBRID_T
+
 };
 turbulance fractal_type = HYBRID_T;
 Mesh mesh;
 Skybox skybox;
+Camera camera;
 float camera_distance = 45.0;
 float horizontalAngle = 0;
 // vertical angle : 0, look at the horizon
@@ -42,9 +45,6 @@ float deltaTime;
 float FoV;
 int xpos, ypos;
 int old_xpos, old_ypos;
-
-
-
 
 void init(){
     glfwEnable(GLFW_KEY_REPEAT);     
@@ -80,9 +80,9 @@ void init(){
         std::cout << "Something Broke!!!" << std::endl;
         break;
     }
-
     mesh.init(simplex_fractal, mesh_height, mesh_width);
     skybox.init();
+    camera.init(camera_distance, horizontalAngle, verticalAngle, initialFoV, camera_pos, mouseSpeed, speed);
 }
 
 void movementCalculations(){
@@ -113,19 +113,21 @@ void display(){
     opengp::update_title_fps("Procedural terrain Generation");
     glViewport(0,0,window_width,window_height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
+
     ///--- Upload viewing matrices externally
     GLuint pid = mesh.getProgramID();
     glUseProgram(pid);
-        movementCalculations();
-
+        camera.cameraMovement();
+        camera.cameraState();
         mat4 MODEL = mat4::Identity();
         glUniformMatrix4fv(glGetUniformLocation(pid, "MODEL"), 1, GL_FALSE, MODEL.data());
 
 
-        vec3 new_position = camera_pos + direction;
+//        vec3 new_position = camera_pos + direction;
+        vec3 new_position = camera.getCameraPosition() + camera.getDirection();
 
-        mat4 VIEW = Eigen::lookAt( camera_pos, new_position, up ); //< "z" up on screen
+//        mat4 VIEW = Eigen::lookAt( camera_pos, new_position, up ); //< "z" up on screen
+        mat4 VIEW = Eigen::lookAt( camera.getCameraPosition(), new_position, camera.getUp() );
         glUniformMatrix4fv(glGetUniformLocation(pid, "VIEW"), 1, GL_FALSE, VIEW.data());
         
         mat4 PROJ = Eigen::perspective(75.0f, window_width/(float)window_height, 0.1f, 100.0f);
@@ -150,15 +152,25 @@ void keyboard(int key, int action){
         mesh.wireframe = !mesh.wireframe;
         skybox.wireframe = !skybox.wireframe;
     }
-    if (action==GLFW_PRESS && key==87)
-        camera_pos += direction * deltaTime * speed;
-    if (action==GLFW_PRESS && key==83)
-        camera_pos -= direction * deltaTime * speed;
-    if (action==GLFW_PRESS && key==68)
-        camera_pos += right_pos * deltaTime * speed;
-    if (action==GLFW_PRESS && key==65)
-        camera_pos -= right_pos * deltaTime * speed;
-
+    if(action==GLFW_PRESS) {
+        if (key==87)
+            camera.moveUp();
+        if (key==83)
+            camera.moveDown();
+        if (key==68)
+            camera.moveRight();
+        if (key==65)
+            camera.moveLeft();
+    } else if(action==GLFW_RELEASE) {
+        if (key==87)
+            camera.stopUp();
+        if (key==83)
+            camera.stopDown();
+        if (key==68)
+            camera.stopRight();
+        if (key==65)
+            camera.stopLeft();
+    }
 }
 
 
