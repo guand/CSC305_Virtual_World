@@ -23,11 +23,8 @@ void main() {
 //    vheight = scale * sin(10*vpoint.x + time);
 //    fnormal_cam = inverse( transpose( mat3(VIEW * MODEL) )) * vnormal;
     fnormal_cam = vnormal;
-    vheight = scale * tex_at( .5*vec2(vpoint.yx)+.5 );
+    vheight = scale * tex_at( .25*vec2(vpoint.yx)+.5 );
 //    vheight = vpoint.z;
-//    if(vheight < 0.0) {
-//        vheight = 0.0;
-//    }
     gl_Position = PROJ * VIEW * MODEL * vec4(vpoint.xy, vheight, 1.0);
     uv = vpoint.yx;
     tex_uv = vtexcoord.yx;

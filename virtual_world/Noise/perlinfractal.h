@@ -4,7 +4,7 @@
 #include "icg_common.h"
 #include "perlin.h"
 
-class Fractal : public Perlin {
+class PerlinFractal : public Perlin {
 private:
     /**
      * @brief iqTurbulence
@@ -13,10 +13,10 @@ private:
      * @param _period
      * @return Modified IQ turbulance
      */
-    float iqTurbulence(int i, int j, int _period)
+    float iqTurbulence(int i, int j)
     {
         float sum = 0.5;
-        float p = _period;
+        float p = m_period;
         vec2 dsum = vec2(0, 0);
         for(int k = 0; k < int(m_octave); ++k)
         {
@@ -44,10 +44,11 @@ private:
      * @param _period
      * @return Basic turbulence function
      */
-    float turbulence(int i, int j, int _period)
+    float turbulence(int i, int j)
     {
         float sum = 0;
-        float p = _period;
+        float maxAmp = 0;
+        float p = m_period;
         for(int k = 0; k < int(m_octave); ++k)
         {
             float noise = perlinNoise(i, j, p);
@@ -61,9 +62,9 @@ private:
         return sum;
     }
 
-    float rigidNoise(int i, int j, int _period)
+    float rigidNoise(int i, int j, int p)
     {
-        return .3f - abs(perlinNoise(i, j, _period));
+        return .3f - abs(perlinNoise(i, j, p));
     }
 
     /**
@@ -73,10 +74,10 @@ private:
      * @param _period
      * @return rigid turbulence
      */
-    float rigidTurbulence(int i, int j, int _period)
+    float rigidTurbulence(int i, int j)
     {
         float sum = 0;
-        float p = _period;
+        float p = m_period;
         for(int k = 0; k < int(m_octave); ++k)
         {
             float noise = rigidNoise(i, j, p);
@@ -90,15 +91,16 @@ private:
         return sum;
     }
 
-    float hybridNoise(int i, int j, int _period)
+    float hybridNoise(int i, int j, int p)
     {
-        return perlinNoise(i, j, _period) + m_offset;
+        return perlinNoise(i, j, p) + m_offset;
     }
 
-    float hybridTurbulence(int i, int j, int _period)
+    float hybridTurbulence(int i, int j)
     {
         float sum = 0;
-        float p = _period;
+        float p = m_period;
+        float maxAmp = 0;
         float result = hybridNoise(i, j, p) * m_exponent_array.at(0);
         p *= 1 / m_lacunarity;
         float weight = result;
@@ -120,7 +122,7 @@ private:
     }
 
 public:
-    Fractal(float octave, int period, int seed, int width, int height, float lacunarity, float gain, float offset)
+    PerlinFractal(float octave, int period, int seed, int width, int height, float lacunarity, float gain, float offset)
     {
         m_octave = octave;
         m_period = period;
@@ -138,7 +140,7 @@ public:
         for (int i = 0; i < m_width; ++i)
             for (int j = 0; j < m_height; ++j)
             {
-                float noise = turbulence(i, j, m_period);
+                float noise = turbulence(i, j);
                 PerlinNoise(i, j) = vec3(noise, noise, noise);
             }
         return PerlinNoise;
@@ -150,7 +152,7 @@ public:
         for (int i = 0; i < m_width; ++i)
             for (int j = 0; j < m_height; ++j)
             {
-                float noise = rigidTurbulence(i, j, m_period);
+                float noise = rigidTurbulence(i, j);
                 PerlinNoise(i, j) = vec3(noise, noise, noise);
             }
         return PerlinNoise;
@@ -162,7 +164,7 @@ public:
         for (int i = 0; i < m_width; ++i)
             for (int j = 0; j < m_height; ++j)
             {
-                float noise = iqTurbulence(i, j, m_period);
+                float noise = iqTurbulence(i, j);
                 PerlinNoise(i, j) = vec3(noise, noise, noise);
             }
         return PerlinNoise;
@@ -174,7 +176,7 @@ public:
         for (int i = 0; i < m_width; ++i)
             for (int j = 0; j < m_height; ++j)
             {
-                float noise = hybridTurbulence(i, j, m_period);
+                float noise = hybridTurbulence(i, j);
                 PerlinNoise(i, j) = vec3(noise, noise, noise);
             }
         return PerlinNoise;

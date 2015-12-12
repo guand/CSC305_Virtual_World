@@ -17,17 +17,19 @@ uniform sampler2D water_tex;
 
 vec3 Y = vec3(0,0,1);
 vec3 G = vec3(0,1,0);
+vec3 OB = vec3(0.53, 0.80, 0.98);
 float textureSize = 512;
 float texelSize = 1.0/textureSize;
 float normalStrength = 8.0;
 float terrainStrength = 8.0;
-vec2 texCoord = .5*uv+.5;
+vec2 texCoord = .25*uv+.5;
 vec2 texTerrain = tex_uv;
 //float tex_at(vec2 uv){ return texture(_tex,uv).r; }
 
 void main() {
   // normal calculation
-//  vec3 L = vec3(0,-2*cos(3.14/180 *(time*20)),2*sin(3.14/180*(time*20)));
+  vec2 T = vec2(-2*cos(3.14/180 *(time)),2*sin(3.14/180*(time)));
+  vec2 T_2 = vec2(-2*cos(3.14/180 *(time*4)),2*sin(3.14/180*(time*4)));
     vec3 L = vec3(0, 1, 1);
 
   float tl = texture(_tex, texCoord + texelSize * vec2(-1, -1)).x;
@@ -52,7 +54,7 @@ void main() {
   float dX2 = tr2 + 2*r2 + br2 - tl2 - 2*l2 - bl2;
   float dY2 = bl2 + 2*b2 + br2 - tl2 - 2*t2 - tr2;
   vec3 NW = normalize(vec3(dX2, 1.0f / terrainStrength, dY2)) + .3;
-  float lamb_water = dot( NW, normalize(L) );
+  float lamb_water = max(dot( NW, normalize(L) ), 0.0);
 
   float tl4 = texture(rock_tex, texTerrain + texelSize * vec2(-1, -1)).x;
   float l4 = texture(rock_tex, texTerrain + texelSize * vec2(-1, 0)).x;
@@ -72,7 +74,8 @@ void main() {
   vec3 rock_color = texture(rock_tex, texTerrain).rgb;
   vec3 grass_color = texture(grass_tex, texTerrain).rgb;
   vec3 sand_color = texture(sand_tex, texTerrain).rgb;
-  vec3 water_color = texture(water_tex, texTerrain).rgb;
+  vec3 water_color = texture(water_tex, texTerrain+T).rgb;
+  vec3 water_color_sm = texture(water_tex, texTerrain*2+T_2).rgb;
   vec3 tex_color = texture(_tex, texCoord).rgb;
   vec3 base_color = mix(Y, G, vheight/scale);
 
@@ -115,9 +118,9 @@ void main() {
       color = mix(sand_color, grass_color, (vheight - 0.03)/(0.04 - 0.03));
       color *= lamb;
   } else {
-      color = mix(water_color, sand_color*lamb, (vheight - 0.0)/(0.02 - 0.0));
-      color *= lamb;
+//      color = mix(water_color, sand_color*lamb, (vheight - 0.0)/(0.02 - 0.0));
+      color = mix(OB*water_color*water_color_sm, sand_color*lamb, (vheight - 0.0)/(0.02 - 0.0));
+//      color = mix(OB*lamb_water, sand_color*lamb, (vheight - 0.0)/(0.02 - 0.0));
   }
-
-
+//  color = N2;
 }

@@ -35,8 +35,8 @@ public:
         glBindVertexArray(_vao);
         check_error_gl();
 
-        float f_tex_u = float(mWidth)*(8/float(mWidth));
-        float f_tex_v = float(mHeight)*(8/float(mHeight));
+        float f_tex_u = float(mWidth)*(32/float(mWidth));
+        float f_tex_v = float(mHeight)*(32/float(mHeight));
         bufferMatrix _triangulation_matrix(mWidth, mHeight);
         ///--- Vertex Buffer
         for(int i = 0; i < mWidth; ++i)
@@ -45,8 +45,8 @@ public:
             {
                 float x_scale = float(i)/float(mWidth-1);
                 float y_scale = float(j)/float(mHeight-1);
-                float x_vertex_pt = -1.0 + (x_scale * 2);
-                float y_vertex_pt = -1.0 + (y_scale * 2);
+                float x_vertex_pt = -2.0 + (x_scale * 4);
+                float y_vertex_pt = -2.0 + (y_scale * 4);
                 float img_scale_width = image.rows()/float(mWidth);
                 float img_scale_height = image.cols()/float(mHeight);
                 vec3 iColor = image(i * img_scale_width, j * img_scale_height);
@@ -182,6 +182,18 @@ public:
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width,
                         height, 0, GL_RGB, GL_FLOAT,
+                        pTex);
+    }
+
+    void loadTextureR32F(void * pTex, int width, int height)
+    {
+        glBindTexture(GL_TEXTURE_2D, _tex);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, width,
+                        height, 0, GL_RED, GL_FLOAT,
                         pTex);
     }
 

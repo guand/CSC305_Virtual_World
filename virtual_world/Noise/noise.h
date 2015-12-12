@@ -18,37 +18,8 @@ protected:
     std::vector<float> m_exponent_array;
     RGBImage m_base;
 
-private:
-    //return a random floating point number between [0, 1]
-    float rand0_1()
-    {
-        return ((float) std::rand())/((float) RAND_MAX);
-    }
-
 public:
-    void init() {
-        float _frequency = 1.0f;
-        for(int i = 0; i < (m_octave + 1); ++i)
-        {
-            m_exponent_array.push_back(pow(_frequency, -1*(m_gain)));
-            _frequency *= m_lacunarity;
-        }
-
-        std::srand(m_seed);
-        RGBImage _base(m_width, m_height);
-        for(int i = 0; i < m_width; ++i)
-        {
-            for(int j = 0; j < m_height; ++j)
-            {
-                vec3 randGradientVec;
-                randGradientVec(0) = cos(2 * M_PI * rand0_1());
-                randGradientVec(1) = sin(2 * M_PI * rand0_1());
-                randGradientVec(2) = 0;
-                _base(i, j) = randGradientVec;
-            }
-        }
-        m_base = _base;
-    }
+    virtual void init() = 0;
 };
 
 #endif // NOISE

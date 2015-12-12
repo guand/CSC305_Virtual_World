@@ -23,6 +23,7 @@ enum turbulance {
     RIGID_T,
     IQ_T,
     HYBRID_T
+    
 };
 turbulance fractal_type = HYBRID_T;
 Mesh mesh;

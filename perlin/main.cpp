@@ -246,8 +246,9 @@ int main(int, char**){
 
 //            float noise = iqTurbulence(period, 4, i, j, width, height, base);
 //            float noise = fBM(i, j, PerlinNoise, 0.25, 2.0, 4.0);
-            float noise = turbulence(period, 5, i, j, width, height, base);
+            float noise = turbulence(period, 1, i, j, width, height, base);
 //            float noise = smoothNoise(i, j);
+            if(noise > 0.5) std::cout << noise << std::endl;
             newNoise(i, j) = vec3(noise, noise, noise);
         }
     showImage(newNoise, "Perlin Noise");
