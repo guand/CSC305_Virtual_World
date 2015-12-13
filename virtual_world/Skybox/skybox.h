@@ -136,13 +136,16 @@ public:
 
     void draw(){
         bindShader();
+
             ///--- Setup the texture units
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_CUBE_MAP, _skybox);
             glUniform1i(glGetUniformLocation(c_pid, "skybox"), 0);
             glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
             glDrawArrays(GL_TRIANGLES, 0 , 36);
+
         unbindShader();
+
     }
 
 private:

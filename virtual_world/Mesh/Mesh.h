@@ -213,8 +213,10 @@ public:
             }
 
             glUniform1f(glGetUniformLocation(_pid, "time"), glfwGetTime());
+            glEnable(GL_CLIP_PLANE0);
             glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
             glDrawElements(GL_TRIANGLE_STRIP, /*#vertices*/ _triangulation_index.size(), GL_UNSIGNED_INT, ZERO_BUFFER_OFFSET);
+            glDisable(GL_CLIP_PLANE0);
         unbindShader();
     }
     

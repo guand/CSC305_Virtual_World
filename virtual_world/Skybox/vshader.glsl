@@ -9,6 +9,7 @@ out vec3 position;
 uniform mat4 MODEL;
 uniform mat4 VIEW;
 uniform mat4 PROJ;
+uniform float reverse;
 
 
 
@@ -21,5 +22,5 @@ void main() {
     R[1][1] =  cos(alpha);
 
    gl_Position = PROJ * VIEW * vec4(vpoint, 1.0);
-   position = vpoint.xzy;
+   position = vec3(vpoint.x, vpoint.z*reverse, vpoint.y);
 }

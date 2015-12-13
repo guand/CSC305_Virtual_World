@@ -1,10 +1,12 @@
 #include "icg_common.h"
+#include "FrameBuffer.h"
 #include "Mesh/mesh.h"
 #include "Noise/perlin.h"
 #include "Noise/perlinfractal.h"
 #include "Noise/simplexfractal.h"
 #include "Skybox/skybox.h"
 #include "Camera/camera.h"
+#include "Water/water.h"
 
 int window_width = 1024;
 int window_height = 768;
@@ -27,11 +29,14 @@ enum turbulance {
 
 };
 turbulance fractal_type = HYBRID_T;
+FrameBuffer fb(window_width, window_height);
+FrameBuffer fb_refract(window_width, window_height);
 Mesh mesh;
+Water water;
 Skybox skybox;
 Camera camera;
 float camera_distance = 45.0;
-float horizontalAngle = 0;
+float horizontalAngle = 0.0f;
 // vertical angle : 0, look at the horizon
 float verticalAngle = 0.0f;
 float initialFoV = 45.0f;
@@ -40,7 +45,7 @@ vec3 direction;
 vec3 right_pos;
 vec3 up;
 float mouseSpeed = 0.005f;
-float speed = 3.0f;
+float speed = 1.0f;
 float deltaTime;
 float FoV;
 int xpos, ypos;
@@ -51,7 +56,6 @@ void init(){
     glClearColor(1,1,1, /*solid*/1.0 );    
 
     glEnable(GL_DEPTH_TEST);
-//    glfwSetMousePos(window_width/2, window_height/2);
     glfwDisable(GLFW_MOUSE_CURSOR);
     PerlinFractal pFractal = PerlinFractal(octave, period, seed, noise_width, noise_height, lacunarity, gain, offset);
     pFractal.init();
@@ -81,33 +85,12 @@ void init(){
         break;
     }
     mesh.init(simplex_fractal, mesh_height, mesh_width);
+    GLuint fb_tex = fb.init();
+    GLuint fb_rtex = fb_refract.init();
     skybox.init();
+    water.init(mesh_height, mesh_width, fb_tex, fb_rtex);
     camera.init(camera_distance, horizontalAngle, verticalAngle, initialFoV, camera_pos, mouseSpeed, speed);
 }
-
-void movementCalculations(){
-    static double lastTime = glfwGetTime();
-    double currentTime = glfwGetTime();
-    deltaTime = currentTime - lastTime;
-
-    glfwGetMousePos(&xpos, &ypos);
-
-    // Reset mouse position for next frame
-    horizontalAngle += mouseSpeed * float(old_xpos - xpos );
-    verticalAngle   += mouseSpeed * float( old_ypos - ypos );
-    old_xpos = xpos;
-    old_ypos = ypos;
-
-    // Compute new orientation
-
-    direction = vec3(cos(verticalAngle) * sin(horizontalAngle), cos(verticalAngle) * cos(horizontalAngle), sin(verticalAngle));
-    right_pos = vec3(sin(horizontalAngle - M_PI/2.0f), cos(horizontalAngle - M_PI/2.0f), 0);
-    up = right_pos.cross(direction);
-    FoV = initialFoV - 5 * glfwGetMouseWheel();
-
-    lastTime = currentTime;
-}
-
 
 void display(){
     opengp::update_title_fps("Procedural terrain Generation");
@@ -120,30 +103,71 @@ void display(){
         camera.cameraMovement();
         camera.cameraState();
         mat4 MODEL = mat4::Identity();
+        mat4 Reflection;
+        Reflection.row(0) << 1,0,0,0;
+        Reflection.row(1) << 0,1,0,0;
+        Reflection.row(2) << 0,0,-1,0;
+        Reflection.row(3) << 0,0,0,1;
+        MODEL = Reflection;
+
         glUniformMatrix4fv(glGetUniformLocation(pid, "MODEL"), 1, GL_FALSE, MODEL.data());
-
-
-//        vec3 new_position = camera_pos + direction;
         vec3 new_position = camera.getCameraPosition() + camera.getDirection();
-
-//        mat4 VIEW = Eigen::lookAt( camera_pos, new_position, up ); //< "z" up on screen
-        mat4 VIEW = Eigen::lookAt( camera.getCameraPosition(), new_position, camera.getUp() );
+        mat4 VIEW = Eigen::lookAt( camera.getCameraPosition(), new_position, camera.getUp() ); //< "z" up on screen
         glUniformMatrix4fv(glGetUniformLocation(pid, "VIEW"), 1, GL_FALSE, VIEW.data());
-        
         mat4 PROJ = Eigen::perspective(75.0f, window_width/(float)window_height, 0.1f, 100.0f);
+
         glUniformMatrix4fv(glGetUniformLocation(pid, "PROJ"), 1, GL_FALSE, PROJ.data());
+        vec3 cam_pos_mirror = camera.getReverseCameraPosition();
+        vec3 reverse_up = camera.getUp();
+        vec3 reverse_position = camera.getReverseCameraPosition() + camera.getDirection();
+
+        glUniform4f(glGetUniformLocation(pid, "plane"), 0.0, 0.0, -1.0, -.01);
     glUseProgram(pid);
-    mesh.draw();
-    glDepthMask(GL_FALSE);
     GLuint c_pid = skybox.getProgramID();
     glUseProgram(c_pid);
-//        mat4 VIEW1 = Eigen::lookAt( camera_pos, vec3(0,0,0), vec3(0,0,1) ); //< "z" up on screen
         glUniformMatrix4fv(glGetUniformLocation(c_pid, "MODEL"), 1, GL_FALSE, MODEL.data());
         glUniformMatrix4fv(glGetUniformLocation(c_pid, "VIEW"), 1, GL_FALSE, VIEW.data());
         glUniformMatrix4fv(glGetUniformLocation(c_pid, "PROJ"), 1, GL_FALSE, PROJ.data());
+        glUniform1f(glGetUniformLocation(c_pid, "reverse"), -1.0);
+    glUseProgram(c_pid);
+    fb.bind();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        mesh.draw();
+        skybox.draw();
+    fb.unbind();
+
+    glUseProgram(pid);
+        MODEL = mat4::Identity();
+        glUniformMatrix4fv(glGetUniformLocation(pid, "MODEL"), 1, GL_FALSE, MODEL.data());
+        glUniform4f(glGetUniformLocation(pid, "plane"), 0.0, 0.0, -1.0, .01);
+    glUseProgram(pid);
+    fb_refract.bind();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        mesh.draw();
+    fb_refract.unbind();
+    glUseProgram(pid);
+        glUniform4f(glGetUniformLocation(pid, "plane"), 0.0, 0.0, 0.0, 0.0);
+    glUseProgram(pid);
+    mesh.draw();
+    glUseProgram(c_pid);
+        glUniform1f(glGetUniformLocation(c_pid, "reverse"), 1.0);
     glUseProgram(c_pid);
     skybox.draw();
-    glDepthMask(GL_TRUE);
+
+
+
+
+
+    GLuint w_pid = water.getProgramID();
+    glUseProgram(w_pid);
+        glUniformMatrix4fv(glGetUniformLocation(w_pid, "MODEL"), 1, GL_FALSE, MODEL.data());
+        glUniformMatrix4fv(glGetUniformLocation(w_pid, "VIEW"), 1, GL_FALSE, VIEW.data());
+        glUniformMatrix4fv(glGetUniformLocation(w_pid, "PROJ"), 1, GL_FALSE, PROJ.data());
+    glUseProgram(w_pid);
+    water.draw();
+
+
+
 }
 
 /// NOTE: see glfwEnable(GLFW_KEY_REPEAT)
@@ -151,6 +175,7 @@ void keyboard(int key, int action){
     if (action==GLFW_PRESS && key==GLFW_KEY_SPACE) {
         mesh.wireframe = !mesh.wireframe;
         skybox.wireframe = !skybox.wireframe;
+        water.wireframe = !water.wireframe;
     }
     if(action==GLFW_PRESS) {
         if (key==87)

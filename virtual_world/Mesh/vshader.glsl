@@ -13,6 +13,7 @@ out float scale=.5;
 uniform mat4 MODEL;
 uniform mat4 VIEW;
 uniform mat4 PROJ;
+uniform vec4 plane;
 
 uniform sampler2D tex;
 float tex_at(vec2 uv){ return texture(tex,uv).r; }
@@ -22,6 +23,8 @@ void main() {
 //    vheight = 0;
 //    vheight = scale * sin(10*vpoint.x + time);
 //    fnormal_cam = inverse( transpose( mat3(VIEW * MODEL) )) * vnormal;
+    vec4 world = MODEL * vec4(vpoint, 1.0);
+    gl_ClipDistance[0] = dot(world, plane);
     fnormal_cam = vnormal;
     vheight = scale * tex_at( .25*vec2(vpoint.yx)+.5 );
 //    vheight = vpoint.z;

@@ -12,6 +12,7 @@ private:
     float m_verticalAngle;
     float m_initialFoV;
     vec3 m_cameraPos;
+    vec3 m_rCameraPos;
     vec3 m_direction;
     vec3 m_rightPos;
     vec3 m_up;
@@ -111,6 +112,13 @@ public:
         return m_cameraPos;
     }
 
+    vec3 getReverseCameraPosition()
+    {
+        m_rCameraPos = m_cameraPos;
+        m_rCameraPos(2) = -1.0*m_cameraPos(2);
+        return m_rCameraPos;
+    }
+
     vec3 getDirection()
     {
         return m_direction;
@@ -119,6 +127,10 @@ public:
     vec3 getUp()
     {
         return m_up;
+    }
+
+    vec3 getInitialDirection() {
+        return vec3(cos(0.0f) * sin(0.0f), cos(0.0f) * cos(0.0f), sin(0.0f));
     }
 
 };
