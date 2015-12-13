@@ -91,7 +91,7 @@ public:
         ///--- Load texture
         glGenTextures(1, &_tex);
         glBindTexture(GL_TEXTURE_2D, _tex);
-        glfwLoadTexture2D("Water/Floor_texture.tga", 0);
+        glfwLoadTexture2D("Water/second_water.tga", 0);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         _tex_mirror = (tex_mirror==-1)? _tex : tex_mirror;
@@ -127,6 +127,8 @@ public:
             glBindTexture(GL_TEXTURE_2D, _tex_refract);
 
             ///--- Draw
+            glUniform1f(glGetUniformLocation(_pid, "time"), glfwGetTime());
+
             glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
 //            glDrawElements(GL_TRIANGLE_STRIP, /*#vertices*/ _triangulation_index.size(), GL_UNSIGNED_INT, ZERO_BUFFER_OFFSET);
             glDrawArrays(GL_TRIANGLE_STRIP, 0, _triangulation.size());

@@ -20,8 +20,8 @@ protected:
 
 private:
     GLuint m_texture[5];
-    const char *m_tex_paths[5] = {"Mesh/grass.tga", "Mesh/rock.tga", "Mesh/sand.tga", "Mesh/snow.tga", "Mesh/water.tga"};
-    const char *m_tex_names[5] = {"grass_tex", "rock_tex", "sand_tex", "snow_tex", "water_tex"};
+    const char *m_tex_paths[5] = {"Mesh/grass.tga", "Mesh/rock.tga", "Mesh/sand.tga", "Mesh/snow.tga", "Mesh/nor_sand.tga"};
+    const char *m_tex_names[5] = {"grass_tex", "rock_tex", "sand_tex", "snow_tex", "nor_sand_tex"};
     int m_num_tex = 6;
 
 public:        

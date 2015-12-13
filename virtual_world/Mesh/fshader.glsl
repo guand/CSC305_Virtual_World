@@ -13,7 +13,7 @@ uniform sampler2D grass_tex;
 uniform sampler2D rock_tex;
 uniform sampler2D sand_tex;
 uniform sampler2D snow_tex;
-uniform sampler2D water_tex;
+uniform sampler2D nor_sand_tex;
 
 vec3 Y = vec3(0,0,1);
 vec3 G = vec3(0,1,0);
@@ -30,7 +30,7 @@ void main() {
   // normal calculation
   vec2 T = vec2(-2*cos(3.14/180 *(time)),2*sin(3.14/180*(time)));
   vec2 T_2 = vec2(-2*cos(3.14/180 *(time*4)),2*sin(3.14/180*(time*4)));
-    vec3 L = vec3(0, 1, 1);
+  vec3 L = vec3(0, 1, 1);
 
   float tl = texture(_tex, texCoord + texelSize * vec2(-1, -1)).x;
   float l = texture(_tex, texCoord + texelSize * vec2(-1, 0)).x;
@@ -43,18 +43,18 @@ void main() {
   float dX = tr + 2*r + br - tl - 2*l - bl;
   float dY = bl + 2*b + br - tl - 2*t - tr;
 
-  float tl2 = texture(water_tex, texTerrain + texelSize * vec2(-1, -1)).x;
-  float l2 = texture(water_tex, texTerrain + texelSize * vec2(-1, 0)).x;
-  float bl2 = texture(water_tex, texTerrain + texelSize * vec2(-1, 1)).x;
-  float t2 = texture(water_tex, texTerrain + texelSize * vec2(0, -1)).x;
-  float b2 = texture(water_tex, texTerrain + texelSize * vec2(0, 1)).x;
-  float tr2 = texture(water_tex, texTerrain + texelSize * vec2(1, -1)).x;
-  float r2 = texture(water_tex, texTerrain + texelSize * vec2(1, 0)).x;
-  float br2 = texture(water_tex, texTerrain + texelSize * vec2(1, 1)).x;
-  float dX2 = tr2 + 2*r2 + br2 - tl2 - 2*l2 - bl2;
-  float dY2 = bl2 + 2*b2 + br2 - tl2 - 2*t2 - tr2;
-  vec3 NW = normalize(vec3(dX2, 1.0f / terrainStrength, dY2)) + .3;
-  float lamb_water = max(dot( NW, normalize(L) ), 0.0);
+//  float tl2 = texture(water_tex, texTerrain + texelSize * vec2(-1, -1)).x;
+//  float l2 = texture(water_tex, texTerrain + texelSize * vec2(-1, 0)).x;
+//  float bl2 = texture(water_tex, texTerrain + texelSize * vec2(-1, 1)).x;
+//  float t2 = texture(water_tex, texTerrain + texelSize * vec2(0, -1)).x;
+//  float b2 = texture(water_tex, texTerrain + texelSize * vec2(0, 1)).x;
+//  float tr2 = texture(water_tex, texTerrain + texelSize * vec2(1, -1)).x;
+//  float r2 = texture(water_tex, texTerrain + texelSize * vec2(1, 0)).x;
+//  float br2 = texture(water_tex, texTerrain + texelSize * vec2(1, 1)).x;
+//  float dX2 = tr2 + 2*r2 + br2 - tl2 - 2*l2 - bl2;
+//  float dY2 = bl2 + 2*b2 + br2 - tl2 - 2*t2 - tr2;
+//  vec3 NW = normalize(vec3(dX2, 1.0f / terrainStrength, dY2)) + .3;
+//  float lamb_water = max(dot( NW, normalize(L) ), 0.0);
 
   float tl4 = texture(rock_tex, texTerrain + texelSize * vec2(-1, -1)).x;
   float l4 = texture(rock_tex, texTerrain + texelSize * vec2(-1, 0)).x;
@@ -69,16 +69,17 @@ void main() {
   vec3 RS = normalize(vec3(dX4, 1.0f / terrainStrength, dY4)) + .3;
   float lamb_rock = max(dot( RS, normalize(L) ), 0.0);
 
+
  // textures
   vec3 snow_color = texture(snow_tex, texTerrain).rgb;
   vec3 rock_color = texture(rock_tex, texTerrain).rgb;
   vec3 grass_color = texture(grass_tex, texTerrain).rgb;
   vec3 sand_color = texture(sand_tex, texTerrain).rgb;
-  vec3 water_color = texture(water_tex, texTerrain+T).rgb;
-  vec3 water_color_sm = texture(water_tex, texTerrain*2+T_2).rgb;
+  vec3 sand_normal_color = texture(nor_sand_tex, texTerrain).rgb;
   vec3 tex_color = texture(_tex, texCoord).rgb;
   vec3 base_color = mix(Y, G, vheight/scale);
 
+   float lamb_sand = max(dot( sand_normal_color, normalize(L) ), 0.0);
   // calculations
   vec3 N1 = normalize(vec3(dX, 1.0f / normalStrength, dY));
   vec3 N2 = normalize(fnormal_cam);
@@ -115,11 +116,12 @@ void main() {
       color = mix(grass_color, grass_rock_color, (vheight - 0.04)/(0.06 - 0.04));
       color *= lamb;
   } else if(vheight <= .03 && vheight > .01) {
-      color = mix(sand_color, grass_color, (vheight - 0.02)/(0.04 - 0.02));
+      color = mix(sand_color*lamb_sand, grass_color, (vheight - 0.02)/(0.04 - 0.02));
       color *= lamb;
   } else {
 //      color = mix(water_color, sand_color*lamb, (vheight - 0.0)/(0.02 - 0.0));
-      color = sand_color*lamb;
+      color = sand_color*lamb_sand;
+      color *= lamb;
 //      color = mix(OB*lamb_water, sand_color*lamb, (vheight - 0.0)/(0.02 - 0.0));
   }
 //  color = N2;
