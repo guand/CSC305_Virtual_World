@@ -17,6 +17,9 @@ protected:
     std::vector<vec2> _triangulation_tex;
     std::vector<int> _triangulation_index;
     typedef Eigen::Matrix<Eigen::Vector3f, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> bufferMatrix;
+    bufferMatrix _heightmap;
+    int _mapheight;
+    int _mapwidth;
 
 private:
     GLuint m_texture[5];
@@ -34,10 +37,13 @@ public:
         glGenVertexArrays(1, &_vao);
         glBindVertexArray(_vao);
         check_error_gl();
-
-        float f_tex_u = float(mWidth)*(32/float(mWidth));
-        float f_tex_v = float(mHeight)*(32/float(mHeight));
+        _mapheight = mHeight;
+        _mapwidth = mWidth;
+        _heightmap = image;
+        float f_tex_u = float(mWidth)*(512/float(mWidth));
+        float f_tex_v = float(mHeight)*(512/float(mHeight));
         bufferMatrix _triangulation_matrix(mWidth, mHeight);
+        bufferMatrix _height_matrix(mWidth, mHeight);
         ///--- Vertex Buffer
         for(int i = 0; i < mWidth; ++i)
         {
@@ -49,14 +55,16 @@ public:
                 float y_vertex_pt = -2.0 + (y_scale * 4);
                 float img_scale_width = image.rows()/float(mWidth);
                 float img_scale_height = image.cols()/float(mHeight);
+
                 vec3 iColor = image(i * img_scale_width, j * img_scale_height);
+                _height_matrix(i, j) = iColor*0.5;
                 float z_height = iColor(0)*.5;
-                if(iColor(0) < 0.0f) z_height = 0.0;
                 _triangulation.push_back(vec3(x_vertex_pt, y_vertex_pt, z_height));
                 _triangulation_matrix(i, j) = vec3(x_vertex_pt, y_vertex_pt, z_height);
                 _triangulation_tex.push_back(vec2(x_scale * f_tex_u, y_scale * f_tex_v));
             }
         }
+//        _heightmap = _height_matrix;
 
         glGenBuffers(1, &_vpoint);
         glBindBuffer(GL_ARRAY_BUFFER, _vpoint);
@@ -172,6 +180,22 @@ public:
 
     }
 
+    float getMapHeight(float x, float y) {
+        float x_coord = (x + 2.0) / 4.0;
+        float y_coord = (y + 2.0) / 4.0;
+        int map_x = x_coord * _mapwidth;
+        int map_y = y_coord * _mapheight;
+        float img_scale_width = _heightmap.rows()/float(_mapwidth);
+        float img_scale_height = _heightmap.cols()/float(_mapheight);
+        if(map_x > _mapwidth || map_x < 0 || map_y > _mapheight || map_y < 0){
+            std::cout << "Outside Map" << std::endl;
+            return 0.0;
+        } else {
+            vec3 height_value = _heightmap(map_x*img_scale_width, map_y*img_scale_height);
+            return height_value(0) * 0.5;
+        }
+    }
+
 
     void loadTextureRGB32F(void * pTex, int width, int height)
     {
@@ -225,8 +249,16 @@ private:
          glGenTextures(1, id);
          glBindTexture(GL_TEXTURE_2D, *id);
          glfwLoadTexture2D(location, 0);
+         glGenerateMipmap(GL_TEXTURE_2D);
          glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+//         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+//         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+//         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+//         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+//         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+//         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 9);
+
          glUniform1i(glGetUniformLocation(_pid, name), texture_id /*GL_TEXTURE0*/);
     }
 

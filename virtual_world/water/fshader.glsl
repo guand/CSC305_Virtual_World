@@ -3,6 +3,7 @@ out vec4 color;
 in vec2 uv;
 in vec3 reflect;
 uniform float time;
+uniform float ftime;
 uniform sampler2D tex;
 uniform sampler2D tex_mirror;
 uniform sampler2D tex_refract;
@@ -10,8 +11,8 @@ in vec4 clipSpace;
 vec4 tangent = vec4(1.0, 0.0, 0.0, 0.0);
 vec4 lightNormal = vec4(0.0, 1.0, 0.0, 0.0);
 vec4 biTangent = vec4(0.0, 0.0, 1.0, 0.0);
-float kDistortion = 0.015;
-float kReflection = 0.020;
+float kDistortion = 0.015 * cos(time*.5);
+float kReflection = 0.020 * sin(time*.5);
 
 
 void main() {
@@ -48,7 +49,7 @@ void main() {
     vec2 reflection = vec2(ndc.x, ndc.y);
 //    color = texture(tex_mirror,reflection).rgb;
 
-    vec4 color_water = vec4(0.16, 0.67, 1.0, 0.0);
+    vec4 color_water = vec4(0.09, 0.26, 1.0, 0.0);
     vec4 color_from_mirror = mix(texture(tex_mirror,projCoord.xy), color_water, 0.3);
     color_from_mirror*=water_normal;
     color_from_mirror*=water_normal_2;

@@ -23,6 +23,7 @@ float texelSize = 1.0/textureSize;
 float normalStrength = 8.0;
 float terrainStrength = 8.0;
 vec2 texCoord = .25*uv+.5;
+vec2 texCoord2 = texCoord * 64;
 vec2 texTerrain = tex_uv;
 //float tex_at(vec2 uv){ return texture(_tex,uv).r; }
 
@@ -56,14 +57,14 @@ void main() {
 //  vec3 NW = normalize(vec3(dX2, 1.0f / terrainStrength, dY2)) + .3;
 //  float lamb_water = max(dot( NW, normalize(L) ), 0.0);
 
-  float tl4 = texture(rock_tex, texTerrain + texelSize * vec2(-1, -1)).x;
-  float l4 = texture(rock_tex, texTerrain + texelSize * vec2(-1, 0)).x;
-  float bl4 = texture(rock_tex, texTerrain + texelSize * vec2(-1, 1)).x;
-  float t4 = texture(rock_tex, texTerrain + texelSize * vec2(0, -1)).x;
-  float b4 = texture(rock_tex, texTerrain + texelSize * vec2(0, 1)).x;
-  float tr4 = texture(rock_tex, texTerrain + texelSize * vec2(1, -1)).x;
-  float r4 = texture(rock_tex, texTerrain + texelSize * vec2(1, 0)).x;
-  float br4 = texture(rock_tex, texTerrain + texelSize * vec2(1, 1)).x;
+  float tl4 = texture(rock_tex, texCoord2 + texelSize * vec2(-1, -1)).x;
+  float l4 = texture(rock_tex, texCoord2 + texelSize * vec2(-1, 0)).x;
+  float bl4 = texture(rock_tex, texCoord2 + texelSize * vec2(-1, 1)).x;
+  float t4 = texture(rock_tex, texCoord2 + texelSize * vec2(0, -1)).x;
+  float b4 = texture(rock_tex, texCoord2 + texelSize * vec2(0, 1)).x;
+  float tr4 = texture(rock_tex, texCoord2 + texelSize * vec2(1, -1)).x;
+  float r4 = texture(rock_tex, texCoord2 + texelSize * vec2(1, 0)).x;
+  float br4 = texture(rock_tex, texCoord2 + texelSize * vec2(1, 1)).x;
   float dX4 = tr4 + 2*r4 + br4 - tl4 - 2*l4 - bl4;
   float dY4 = bl4 + 2*b4 + br4 - tl4 - 2*t4 - tr4;
   vec3 RS = normalize(vec3(dX4, 1.0f / terrainStrength, dY4)) + .3;
@@ -75,7 +76,7 @@ void main() {
   vec3 rock_color = texture(rock_tex, texTerrain).rgb;
   vec3 grass_color = texture(grass_tex, texTerrain).rgb;
   vec3 sand_color = texture(sand_tex, texTerrain).rgb;
-  vec3 sand_normal_color = texture(nor_sand_tex, texTerrain).rgb;
+  vec3 sand_normal_color = texture(nor_sand_tex, texCoord2).rgb;
   vec3 tex_color = texture(_tex, texCoord).rgb;
   vec3 base_color = mix(Y, G, vheight/scale);
 
@@ -83,7 +84,7 @@ void main() {
   // calculations
   vec3 N1 = normalize(vec3(dX, 1.0f / normalStrength, dY));
   vec3 N2 = normalize(fnormal_cam);
-  vec3 N = N1 + N2 * .5;
+  vec3 N = (N1 + N2) * .75;
   float slope = dot(N1 , vec3(0, 1, 0));
   float PI = 3.1415926535897932384626433832795;
   float angle = acos(slope)*(180/PI);
@@ -91,32 +92,30 @@ void main() {
   float lamb = max(dot( N, normalize(L) ), 0.0);
 
   if(vheight > .45) {
-      if(angle <= 40){
-        color = mix(rock_color*lamb_rock, snow_color, pow(0.5, ((angle - 0.0) / (40.0 - 0.0))));
+      if(angle <= 50){
+        color = mix(rock_color* lamb_rock, snow_color, pow(0.40, ((angle - 0.0) / (50.0 - 0.0))));
+//        color = mix(snow_color, rock_color* lamb_rock, angle*(log(10.0 - pow(50.0,angle)) / log(50.0)));
       } else {
-        color = rock_color*lamb_rock;
+        color = mix(snow_color, rock_color * lamb_rock, pow(0.55,(vheight - 0.46)/(0.95 - 0.46)));
       }
       color *= lamb;
   } else if (vheight <= .45 && vheight > .35) {
-      if(angle <= 40){
-        color = mix(rock_color*lamb_rock, grass_color, pow(0.5, ((angle - 0.0) / (40.0 - 0.0))));
+      if(angle <= 50){
+        color = mix(grass_color, rock_color* lamb_rock, ((angle - 0.0) / (50.0 - 0.0)));
       } else {
-        color = rock_color*lamb_rock;
+        color = rock_color* lamb_rock;
       }
       color *= lamb;
   } else if (vheight <= 35 && vheight > .06) {
-      if(angle <= 40) {
-        color = mix(grass_color, rock_color*lamb_rock, (angle - 0.0) / (40.0 - 0.0));
+      if(angle <= 50) {
+        color = mix(grass_color, rock_color* lamb_rock, (angle - 0.0) / (50.0 - 0.0));
       } else {
-        color = rock_color*lamb_rock;
+        color = rock_color* lamb_rock;
       }
       color *= lamb;
-  } else if (vheight <= .06 && vheight > .03) {
-      vec3 grass_rock_color = mix(grass_color, rock_color*lamb_rock, (angle - 0.0) / (40.0 - 0.0));
-      color = mix(grass_color, grass_rock_color, (vheight - 0.04)/(0.06 - 0.04));
-      color *= lamb;
-  } else if(vheight <= .03 && vheight > .01) {
-      color = mix(sand_color*lamb_sand, grass_color, (vheight - 0.02)/(0.04 - 0.02));
+  } else if (vheight <= .06 && vheight > 0.0) {
+      vec3 grass_rock_color = mix(grass_color, rock_color*lamb_rock, (angle - 0.0) / (50.0 - 0.0));
+      color = mix(sand_color*lamb_sand, grass_rock_color, (vheight - 0.01)/(0.06 - 0.01));
       color *= lamb;
   } else {
 //      color = mix(water_color, sand_color*lamb, (vheight - 0.0)/(0.02 - 0.0));

@@ -10,13 +10,13 @@
 
 int window_width = 1024;
 int window_height = 768;
-int noise_width = 512;
-int noise_height = 512;
+int noise_width = 768;
+int noise_height = 768;
 int mesh_width = 256;
 int mesh_height = 256;
-float octave = 8.0;
+float octave = 6.0;
 int period = 256;
-int seed = 2506611879;
+int seed = 434;
 float lacunarity = 2.0;
 float gain = 1.0;
 float offset = 0.7;
@@ -40,7 +40,7 @@ float horizontalAngle = 0.0f;
 // vertical angle : 0, look at the horizon
 float verticalAngle = 0.0f;
 float initialFoV = 45.0f;
-vec3 camera_pos(0, 0, .5);
+vec3 camera_pos(0, 0, 1.0);
 vec3 direction;
 vec3 right_pos;
 vec3 up;
@@ -101,16 +101,16 @@ void display(){
     GLuint pid = mesh.getProgramID();
     glUseProgram(pid);
         camera.cameraMovement();
+        float height_pos = mesh.getMapHeight(camera.getCameraPosition()(0), camera.getCameraPosition()(1));
+        camera.setHeight(height_pos);
         camera.cameraState();
         mat4 MODEL = mat4::Identity();
-        mat4 Reflection;
-        Reflection.row(0) << 1,0,0,0;
-        Reflection.row(1) << 0,1,0,0;
-        Reflection.row(2) << 0,0,-1,0;
-        Reflection.row(3) << 0,0,0,1;
-        MODEL = Reflection;
+
+        MODEL.row(2) << 0,0,-1,0;
 
         glUniformMatrix4fv(glGetUniformLocation(pid, "MODEL"), 1, GL_FALSE, MODEL.data());
+
+
         vec3 new_position = camera.getCameraPosition() + camera.getDirection();
         mat4 VIEW = Eigen::lookAt( camera.getCameraPosition(), new_position, camera.getUp() ); //< "z" up on screen
         glUniformMatrix4fv(glGetUniformLocation(pid, "VIEW"), 1, GL_FALSE, VIEW.data());
@@ -125,8 +125,13 @@ void display(){
     glUseProgram(pid);
     GLuint c_pid = skybox.getProgramID();
     glUseProgram(c_pid);
+    mat4 VIEW2 = mat4::Identity();
+
+    for(int i = 0; i < 3; ++i)
+        for(int j = 0; j < 3; ++j)
+            VIEW2(i, j) = VIEW(i, j);
         glUniformMatrix4fv(glGetUniformLocation(c_pid, "MODEL"), 1, GL_FALSE, MODEL.data());
-        glUniformMatrix4fv(glGetUniformLocation(c_pid, "VIEW"), 1, GL_FALSE, VIEW.data());
+        glUniformMatrix4fv(glGetUniformLocation(c_pid, "VIEW"), 1, GL_FALSE, VIEW2.data());
         glUniformMatrix4fv(glGetUniformLocation(c_pid, "PROJ"), 1, GL_FALSE, PROJ.data());
         glUniform1f(glGetUniformLocation(c_pid, "reverse"), -1.0);
     glUseProgram(c_pid);
@@ -139,7 +144,7 @@ void display(){
     glUseProgram(pid);
         MODEL = mat4::Identity();
         glUniformMatrix4fv(glGetUniformLocation(pid, "MODEL"), 1, GL_FALSE, MODEL.data());
-        glUniform4f(glGetUniformLocation(pid, "plane"), 0.0, 0.0, -1.0, .01);
+        glUniform4f(glGetUniformLocation(pid, "plane"), 0.0, 0.0, -1.0, .1);
     glUseProgram(pid);
     fb_refract.bind();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -149,12 +154,6 @@ void display(){
         glUniform4f(glGetUniformLocation(pid, "plane"), 0.0, 0.0, 0.0, 0.0);
     glUseProgram(pid);
     mesh.draw();
-    glUseProgram(c_pid);
-        glUniform1f(glGetUniformLocation(c_pid, "reverse"), 1.0);
-    glUseProgram(c_pid);
-    skybox.draw();
-
-
 
 
 
@@ -165,6 +164,15 @@ void display(){
         glUniformMatrix4fv(glGetUniformLocation(w_pid, "PROJ"), 1, GL_FALSE, PROJ.data());
     glUseProgram(w_pid);
     water.draw();
+
+    glUseProgram(c_pid);
+
+
+        glUniformMatrix4fv(glGetUniformLocation(c_pid, "VIEW"), 1, GL_FALSE, VIEW2.data());
+        glUniform1f(glGetUniformLocation(c_pid, "reverse"), 1.0);
+    glUseProgram(c_pid);
+
+    skybox.draw();
 
 
 
@@ -186,6 +194,8 @@ void keyboard(int key, int action){
             camera.moveRight();
         if (key==65)
             camera.moveLeft();
+        if (key==70)
+            camera.toggleFlymode();
     } else if(action==GLFW_RELEASE) {
         if (key==87)
             camera.stopUp();

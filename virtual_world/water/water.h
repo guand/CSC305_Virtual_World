@@ -127,7 +127,10 @@ public:
             glBindTexture(GL_TEXTURE_2D, _tex_refract);
 
             ///--- Draw
-            glUniform1f(glGetUniformLocation(_pid, "time"), glfwGetTime());
+            float t = glfwGetTime();
+            float ftime = fmod(t, 2);
+            glUniform1f(glGetUniformLocation(_pid, "ftime"), ftime);
+            glUniform1f(glGetUniformLocation(_pid, "time"), t);
 
             glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
 //            glDrawElements(GL_TRIANGLE_STRIP, /*#vertices*/ _triangulation_index.size(), GL_UNSIGNED_INT, ZERO_BUFFER_OFFSET);

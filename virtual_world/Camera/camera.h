@@ -20,9 +20,10 @@ private:
     float m_speed;
     float m_deltaTime;
     float m_FoV;
+    float m_height;
     int m_xPos, m_yPos;
     int m_oldXPos, m_oldYPos;
-    bool m_moveUp, m_moveDown, m_moveRight, m_moveLeft;
+    bool m_moveUp, m_moveDown, m_moveRight, m_moveLeft, m_flymode;
 
 public:
     void init(float cameraDistance, float horizontalAngle, float verticleAngle, float initialFoV, vec3 cameraPos, float mouseSpeed, float speed)
@@ -38,6 +39,7 @@ public:
         m_moveDown = false;
         m_moveRight = false;
         m_moveLeft = false;
+        m_flymode = true;
     }
 
     void cameraMovement()
@@ -73,6 +75,8 @@ public:
             m_cameraPos += m_rightPos * m_deltaTime * m_speed;
         if(m_moveLeft)
             m_cameraPos -= m_rightPos * m_deltaTime * m_speed;
+        if(m_flymode)
+            m_cameraPos(2) = m_height + 0.2;
     }
 
     void moveUp() {
@@ -105,6 +109,14 @@ public:
 
     void stopLeft() {
         m_moveLeft = false;
+    }
+
+    void setHeight(float height) {
+        m_height = height;
+    }
+
+    void toggleFlymode() {
+        m_flymode = !m_flymode;
     }
 
     vec3 getCameraPosition()
