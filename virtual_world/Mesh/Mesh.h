@@ -187,7 +187,7 @@ public:
         int map_y = y_coord * _mapheight;
         float img_scale_width = _heightmap.rows()/float(_mapwidth);
         float img_scale_height = _heightmap.cols()/float(_mapheight);
-        if(map_x > _mapwidth || map_x < 0 || map_y > _mapheight || map_y < 0){
+        if(map_x > _mapwidth-1 || map_x < 0 || map_y > _mapheight-1 || map_y < 0){
             std::cout << "Outside Map" << std::endl;
             return 0.0;
         } else {

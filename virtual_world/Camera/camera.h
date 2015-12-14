@@ -76,7 +76,7 @@ public:
         if(m_moveLeft)
             m_cameraPos -= m_rightPos * m_deltaTime * m_speed;
         if(m_flymode)
-            m_cameraPos(2) = m_height + 0.2;
+            m_cameraPos(2) = m_height + 0.3;
     }
 
     void moveUp() {
@@ -117,6 +117,10 @@ public:
 
     void toggleFlymode() {
         m_flymode = !m_flymode;
+    }
+
+    bool getFlymode() {
+        return m_flymode;
     }
 
     vec3 getCameraPosition()

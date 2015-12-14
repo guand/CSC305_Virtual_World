@@ -101,8 +101,10 @@ void display(){
     GLuint pid = mesh.getProgramID();
     glUseProgram(pid);
         camera.cameraMovement();
-        float height_pos = mesh.getMapHeight(camera.getCameraPosition()(0), camera.getCameraPosition()(1));
-        camera.setHeight(height_pos);
+        if(camera.getFlymode()) {
+            float height_pos = mesh.getMapHeight(camera.getCameraPosition()(0), camera.getCameraPosition()(1));
+            camera.setHeight(height_pos);
+        }
         camera.cameraState();
         mat4 MODEL = mat4::Identity();
 
@@ -121,7 +123,7 @@ void display(){
         vec3 reverse_up = camera.getUp();
         vec3 reverse_position = camera.getReverseCameraPosition() + camera.getDirection();
 
-        glUniform4f(glGetUniformLocation(pid, "plane"), 0.0, 0.0, -1.0, -.01);
+        glUniform4f(glGetUniformLocation(pid, "plane"), 0.0, 0.0, -1.0, 0.0);
     glUseProgram(pid);
     GLuint c_pid = skybox.getProgramID();
     glUseProgram(c_pid);
@@ -144,7 +146,7 @@ void display(){
     glUseProgram(pid);
         MODEL = mat4::Identity();
         glUniformMatrix4fv(glGetUniformLocation(pid, "MODEL"), 1, GL_FALSE, MODEL.data());
-        glUniform4f(glGetUniformLocation(pid, "plane"), 0.0, 0.0, -1.0, .1);
+        glUniform4f(glGetUniformLocation(pid, "plane"), 0.0, 0.0, -1.0, 0.1);
     glUseProgram(pid);
     fb_refract.bind();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
